@@ -264,13 +264,13 @@ export function CompaniesContent() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
                           Company Size
                         </label>
                         <select
                           value={selectedSize}
                           onChange={(e) => setSelectedSize(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-[#041F2B]"
+                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
                         >
                           {sizes.map((size) => (
                             <option key={size} value={size}>
@@ -280,13 +280,13 @@ export function CompaniesContent() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
                           Location
                         </label>
                         <select
                           value={selectedLocation}
                           onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-[#041F2B]"
+                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
                         >
                           {locations.map((location) => (
                             <option key={location} value={location}>

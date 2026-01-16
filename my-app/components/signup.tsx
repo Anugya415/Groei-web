@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,18 +17,30 @@ const benefits = [
 ];
 
 export function SignupContent() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/dashboard");
+    }, 1000);
   };
 
   return (
@@ -97,7 +110,7 @@ export function SignupContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
+                  <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium text-[#e8e8f0]">
                         Full Name
@@ -111,6 +124,7 @@ export function SignupContent() {
                           placeholder="John Doe"
                           value={formData.name}
                           onChange={handleChange}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -128,6 +142,7 @@ export function SignupContent() {
                           placeholder="you@example.com"
                           value={formData.email}
                           onChange={handleChange}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -145,6 +160,7 @@ export function SignupContent() {
                           placeholder="Create a strong password"
                           value={formData.password}
                           onChange={handleChange}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -162,6 +178,7 @@ export function SignupContent() {
                           placeholder="Confirm your password"
                           value={formData.confirmPassword}
                           onChange={handleChange}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -170,6 +187,7 @@ export function SignupContent() {
                       <input
                         type="checkbox"
                         id="terms"
+                        required
                         className="mt-1 w-4 h-4 rounded border-[#2a2a3a] bg-[#1e1e2e] text-[#6366f1] focus:ring-[#6366f1] focus:ring-offset-0"
                       />
                       <label htmlFor="terms" className="text-sm text-[#9ca3af] leading-relaxed">
@@ -183,14 +201,15 @@ export function SignupContent() {
                         </Link>
                       </label>
                     </div>
-                  </div>
-
-                  <Button
-                    className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30 text-base font-semibold"
-                  >
-                    Create Account
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
+                    <Button
+                      type="submit"
+                      disabled={isLoading || !formData.name || !formData.email || !formData.password || !formData.confirmPassword}
+                      className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? "Creating Account..." : "Create Account"}
+                      {!isLoading && <ArrowRight className="h-5 w-5 ml-2" />}
+                    </Button>
+                  </form>
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">

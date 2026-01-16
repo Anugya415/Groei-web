@@ -1,6 +1,5 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { DashboardContent } from "@/components/dashboard";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
 
 export const metadata = {
   title: "Dashboard - GROEI",
@@ -9,12 +8,11 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950">
-      <Navbar />
-      <main className="flex-1 bg-white dark:bg-slate-950">
+    <div className="min-h-screen flex bg-[#0a0a0f]">
+      <DashboardSidebar />
+      <main className="flex-1 lg:ml-64">
         <DashboardContent />
       </main>
-      <Footer />
     </div>
   );
 }

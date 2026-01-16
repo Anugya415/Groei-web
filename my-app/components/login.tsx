@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,20 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 export function LoginContent() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/dashboard");
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
@@ -79,7 +92,7 @@ export function LoginContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="email" className="text-sm font-medium text-[#e8e8f0]">
                         Email
@@ -92,6 +105,7 @@ export function LoginContent() {
                           placeholder="you@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -108,6 +122,7 @@ export function LoginContent() {
                           placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          required
                           className="pl-10 h-12 border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                         />
                       </div>
@@ -130,14 +145,15 @@ export function LoginContent() {
                         Forgot password?
                       </Link>
                     </div>
-                  </div>
-
-                  <Button
-                    className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30 text-base font-semibold"
-                  >
-                    Sign In
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
+                    <Button
+                      type="submit"
+                      disabled={isLoading || !email || !password}
+                      className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? "Signing in..." : "Sign In"}
+                      {!isLoading && <ArrowRight className="h-5 w-5 ml-2" />}
+                    </Button>
+                  </form>
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
