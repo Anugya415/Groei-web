@@ -19,7 +19,6 @@ import {
   ArrowDownRight,
   Calendar,
   Target,
-  DollarSign,
   MessageSquare
 } from "lucide-react";
 import { motion } from "framer-motion";

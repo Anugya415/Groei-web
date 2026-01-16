@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { companiesAPI } from "@/lib/api";
 
 const industries = ["All Industries", "Technology", "Finance", "Healthcare", "Education", "E-commerce", "Consulting"];
 const sizes = ["All Sizes", "Startup (1-50)", "Small (51-200)", "Medium (201-1000)", "Large (1000+)"];
@@ -130,6 +131,43 @@ export function CompaniesContent() {
   const [selectedSize, setSelectedSize] = useState("All Sizes");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [showFilters, setShowFilters] = useState(false);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadCompanies();
+  }, [selectedIndustry, selectedSize, selectedLocation]);
+
+  const loadCompanies = async () => {
+    try {
+      setIsLoading(true);
+      const response = await companiesAPI.getAll();
+      if (response.companies) {
+        const formattedCompanies = response.companies.map((company: any) => ({
+          id: company.id,
+          name: company.name || "",
+          industry: company.industry || "",
+          location: company.location || "",
+          size: company.size || "",
+          employees: company.employee_count ? `${company.employee_count}+` : "",
+          jobs: company.job_count || 0,
+          description: company.description || "",
+          website: company.website || "",
+          founded: company.founded_year || null,
+          rating: 4.5,
+          verified: company.verified || false,
+          featured: company.featured || false,
+          logo: company.name ? company.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : "CO",
+        }));
+        setCompanies(formattedCompanies);
+      }
+    } catch (error) {
+      console.error("Failed to load companies:", error);
+      setCompanies([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const topCompanies = companies.filter(company => company.featured);
   

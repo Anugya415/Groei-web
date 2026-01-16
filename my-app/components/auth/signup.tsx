@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Sparkles, Mail, Lock, User, ArrowRight, Github, CheckCircle2, Building2, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { authAPI } from "@/lib/api";
 
 const benefits = [
   "AI-powered job matching",
@@ -34,6 +35,7 @@ export function SignupContent() {
     company: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -44,33 +46,71 @@ export function SignupContent() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    setTimeout(() => {
-      setIsLoading(false);
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const signupData: any = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role === "admin" ? "admin" : "user",
+      };
+      
+      if (formData.role === "admin" && formData.company) {
+        signupData.company = formData.company;
+      }
+      
+      const response = await authAPI.signup(signupData);
+      
       if (typeof window !== "undefined") {
         localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userRole", formData.role);
+        localStorage.setItem("userRole", response.user.role);
+        if (response.token) {
+          localStorage.setItem("authToken", response.token);
+        }
         
-        if (formData.role === "admin") {
+        if (response.user.role === "admin") {
           localStorage.setItem("isAdminLoggedIn", "true");
-          localStorage.setItem("userRole", "admin");
-          if (formData.company) {
-            localStorage.setItem("adminCompany", formData.company);
+          if (response.user.company_id) {
+            localStorage.setItem("adminCompany", response.user.company_name || formData.company || "");
           }
-          if (formData.name) {
-            localStorage.setItem("adminName", formData.name);
+          if (response.user.name) {
+            localStorage.setItem("adminName", response.user.name);
           }
-          if (formData.email) {
-            localStorage.setItem("adminEmail", formData.email);
+          if (response.user.email) {
+            localStorage.setItem("adminEmail", response.user.email);
           }
-          router.push("/admin");
+        }
+        router.push("/profile/complete");
+      }
+    } catch (err: any) {
+      let errorMessage = "Signup failed. Please try again.";
+      
+      if (err && err.message) {
+        const msg = err.message.toLowerCase();
+        if (msg.includes("connect to server") || msg.includes("failed to fetch") || msg.includes("network")) {
+          errorMessage = "Unable to connect to server. Please make sure the backend is running on http://localhost:8080";
+        } else if (msg.includes("email already registered") || msg.includes("email already exists")) {
+          errorMessage = "This email is already registered. Please use a different email or try logging in.";
+        } else if (msg.includes("password") && msg.includes("required")) {
+          errorMessage = "Password must be at least 6 characters long.";
+        } else if (msg.includes("valid email")) {
+          errorMessage = "Please enter a valid email address.";
         } else {
-          localStorage.setItem("userRole", "user");
-          router.push("/dashboard");
+          errorMessage = err.message;
         }
       }
-    }, 1000);
+      
+      setError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,6 +180,11 @@ export function SignupContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {error && (
+                    <div className="p-3 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444] text-sm">
+                      {error}
+                    </div>
+                  )}
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium text-[#e8e8f0]">

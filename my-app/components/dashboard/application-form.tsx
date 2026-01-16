@@ -11,7 +11,6 @@ import {
   ChevronLeft,
   FileText,
   Calendar,
-  DollarSign,
   Linkedin,
   Info,
   CheckCircle2

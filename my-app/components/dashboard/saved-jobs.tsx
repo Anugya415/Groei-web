@@ -20,75 +20,20 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const mockSavedJobs = [
-  {
-    id: 1,
-    jobTitle: "Senior Full Stack Developer",
-    company: "TechCorp",
-    match: 98,
-    location: "San Francisco, CA",
-    salary: "₹10L - ₹15L",
-    type: "Full-time",
-    postedDate: "2 days ago",
-    savedDate: "Dec 10, 2024",
-  },
-  {
-    id: 2,
-    jobTitle: "UX/UI Designer",
-    company: "Design Studio",
-    match: 95,
-    location: "Remote",
-    salary: "₹7.5L - ₹11L",
-    type: "Full-time",
-    postedDate: "5 days ago",
-    savedDate: "Dec 8, 2024",
-  },
-  {
-    id: 3,
-    jobTitle: "Product Manager",
-    company: "StartupXYZ",
-    match: 92,
-    location: "New York, NY",
-    salary: "₹9L - ₹13L",
-    type: "Full-time",
-    postedDate: "1 week ago",
-    savedDate: "Dec 5, 2024",
-  },
-  {
-    id: 4,
-    jobTitle: "Data Scientist",
-    company: "DataLabs",
-    match: 89,
-    location: "Remote",
-    salary: "₹11L - ₹16L",
-    type: "Full-time",
-    postedDate: "3 days ago",
-    savedDate: "Dec 9, 2024",
-  },
-  {
-    id: 5,
-    jobTitle: "Backend Engineer",
-    company: "CloudTech",
-    match: 87,
-    location: "Seattle, WA",
-    salary: "₹8L - ₹12L",
-    type: "Full-time",
-    postedDate: "1 week ago",
-    savedDate: "Dec 3, 2024",
-  },
-];
+import { jobsAPI } from "@/lib/api";
 
 export function SavedJobsContent() {
   const router = useRouter();
-  const [savedJobs, setSavedJobs] = useState(mockSavedJobs);
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [selectedJob, setSelectedJob] = useState<{ id: number; jobTitle: string; company: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadSavedJobs();
     if (typeof window !== "undefined") {
       const loggedIn = localStorage.getItem("isLoggedIn") === "true";
       setIsLoggedIn(loggedIn);
@@ -97,16 +42,26 @@ export function SavedJobsContent() {
       if (savedAppliedJobs) {
         setAppliedJobs(JSON.parse(savedAppliedJobs));
       }
+    }
+  }, []);
 
-      const savedJobsFromStorage = localStorage.getItem("savedJobs");
-      if (savedJobsFromStorage) {
-        const parsed = JSON.parse(savedJobsFromStorage);
-        if (parsed.length > 0) {
+  const loadSavedJobs = async () => {
+    try {
+      setIsLoading(true);
+      if (typeof window !== "undefined") {
+        const savedJobsData = localStorage.getItem("savedJobs");
+        if (savedJobsData) {
+          const parsed = JSON.parse(savedJobsData);
           setSavedJobs(parsed);
         }
       }
+    } catch (error) {
+      console.error("Failed to load saved jobs:", error);
+      setSavedJobs([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
   const filteredJobs = savedJobs.filter(
     (job) =>

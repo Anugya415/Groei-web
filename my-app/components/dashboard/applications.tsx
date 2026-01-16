@@ -26,6 +26,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { applicationsAPI } from "@/lib/api";
 
 const applicationDetails: { [key: number]: any } = {
   1: {
@@ -226,18 +227,14 @@ const statusColors = {
 export function ApplicationsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [userApplications, setUserApplications] = useState(mockApplications);
+  const [userApplications, setUserApplications] = useState<any[]>([]);
   const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"view" | "details" | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadApplications();
     if (typeof window !== "undefined") {
-      const savedApplications = localStorage.getItem("userApplications");
-      if (savedApplications) {
-        const parsed = JSON.parse(savedApplications);
-        setUserApplications([...mockApplications, ...parsed]);
-      }
-
       const urlParams = new URLSearchParams(window.location.search);
       const appId = urlParams.get("appId");
       if (appId) {
@@ -248,7 +245,38 @@ export function ApplicationsContent() {
         }
       }
     }
-  }, []);
+  }, [statusFilter]);
+
+  const loadApplications = async () => {
+    try {
+      setIsLoading(true);
+      const response = await applicationsAPI.getMyApplications();
+      if (response.applications) {
+        const formattedApplications = response.applications.map((app: any) => ({
+          id: app.id,
+          jobTitle: app.job_title || "",
+          company: app.company_name || "",
+          status: app.status || "Application Sent",
+          match: app.match_score || 0,
+          date: app.applied_at || new Date().toISOString(),
+          interviewDate: app.interview_date ? new Date(app.interview_date).toLocaleDateString() : null,
+          location: app.job_location || "",
+          salary: "",
+          type: app.job_type || "Full-time",
+          appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : "",
+          coverLetter: app.cover_letter || "",
+          resumeUrl: app.resume_url || "",
+          notes: app.notes || "",
+        }));
+        setUserApplications(formattedApplications);
+      }
+    } catch (error) {
+      console.error("Failed to load applications:", error);
+      setUserApplications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredApplications = userApplications.filter((app) => {
     const matchesSearch = 
@@ -457,8 +485,7 @@ export function ApplicationsContent() {
                 <CardContent className="p-6 space-y-6">
                   {(() => {
                     const app = userApplications.find(a => a.id === selectedApplication);
-                    const details = applicationDetails[selectedApplication];
-                    if (!app || !details) return null;
+                    if (!app) return null;
 
                     if (viewMode === "view") {
                       return (
@@ -500,7 +527,7 @@ export function ApplicationsContent() {
                                     </Badge>
                                   </div>
                                   <div className="text-sm text-[#9ca3af]">
-                                    <div>Application ID: {details.applicationId}</div>
+                                    <div>Application ID: APP-{app.id.toString().padStart(6, '0')}</div>
                                     <div>Applied: {app.appliedDate}</div>
                                     {app.interviewDate && (
                                       <div>Interview: {app.interviewDate}</div>
@@ -515,20 +542,10 @@ export function ApplicationsContent() {
                             <CardContent className="p-4">
                               <h4 className="font-semibold text-[#e8e8f0] mb-4 flex items-center gap-2">
                                 <User className="h-5 w-5 text-[#6366f1]" />
-                                Recruiter Contact
+                                Application Details
                               </h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2 text-[#e8e8f0]">
-                                  <span className="font-medium">{details.recruiter.name}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[#9ca3af]">
-                                  <Mail className="h-4 w-4" />
-                                  <span>{details.recruiter.email}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[#9ca3af]">
-                                  <Phone className="h-4 w-4" />
-                                  <span>{details.recruiter.phone}</span>
-                                </div>
+                              <div className="space-y-2 text-sm text-[#9ca3af]">
+                                <p>Contact information will be available once the recruiter reviews your application.</p>
                               </div>
                             </CardContent>
                           </Card>
@@ -562,15 +579,19 @@ export function ApplicationsContent() {
                           <CardContent className="space-y-4">
                             <div>
                               <p className="text-sm font-medium text-[#9ca3af] mb-1">Application ID</p>
-                              <p className="text-[#e8e8f0]">{details.applicationId}</p>
+                              <p className="text-[#e8e8f0]">APP-{app.id.toString().padStart(6, '0')}</p>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-[#9ca3af] mb-1">Resume Version</p>
-                              <p className="text-[#e8e8f0]">{details.resumeVersion}</p>
-                            </div>
+                            {app.resumeUrl && (
+                              <div>
+                                <p className="text-sm font-medium text-[#9ca3af] mb-1">Resume</p>
+                                <a href={app.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:underline">
+                                  View Resume
+                                </a>
+                              </div>
+                            )}
                             <div>
                               <p className="text-sm font-medium text-[#9ca3af] mb-2">Cover Letter</p>
-                              <p className="text-[#9ca3af] leading-relaxed">{details.coverLetter || app.coverLetter || "No cover letter provided"}</p>
+                              <p className="text-[#9ca3af] leading-relaxed">{app.coverLetter || "No cover letter provided"}</p>
                             </div>
                             {app.availability && (
                               <div>
@@ -604,10 +625,12 @@ export function ApplicationsContent() {
                                 <p className="text-[#9ca3af] leading-relaxed">{app.additionalInfo}</p>
                               </div>
                             )}
-                            <div>
-                              <p className="text-sm font-medium text-[#9ca3af] mb-2">Notes</p>
-                              <p className="text-[#9ca3af] leading-relaxed">{details.notes}</p>
-                            </div>
+                            {app.notes && (
+                              <div>
+                                <p className="text-sm font-medium text-[#9ca3af] mb-2">Notes</p>
+                                <p className="text-[#9ca3af] leading-relaxed">{app.notes}</p>
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
 
@@ -617,7 +640,10 @@ export function ApplicationsContent() {
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-4">
-                              {details.timeline.map((item: any, index: number) => (
+                              {[
+                                { date: app.appliedDate, event: "Application Submitted", status: "completed" },
+                                ...(app.interviewDate ? [{ date: app.interviewDate, event: "Interview Scheduled", status: "upcoming" }] : [])
+                              ].map((item: any, index: number, array: any[]) => (
                                 <div key={index} className="flex gap-4">
                                   <div className="flex flex-col items-center">
                                     <div className={`w-3 h-3 rounded-full ${
@@ -625,7 +651,7 @@ export function ApplicationsContent() {
                                       item.status === "in-progress" ? "bg-[#6366f1]" :
                                       "bg-[#9ca3af]"
                                     }`} />
-                                    {index < details.timeline.length - 1 && (
+                                    {index < array.length - 1 && (
                                       <div className={`w-0.5 h-12 ${
                                         item.status === "completed" ? "bg-[#10b981]" : "bg-[#2a2a3a]"
                                       }`} />
@@ -649,20 +675,8 @@ export function ApplicationsContent() {
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
-                            <div className="flex items-center gap-2 text-[#e8e8f0]">
-                              <span className="font-medium">{details.recruiter.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-[#9ca3af]">
-                              <Mail className="h-4 w-4" />
-                              <a href={`mailto:${details.recruiter.email}`} className="hover:text-[#6366f1]">
-                                {details.recruiter.email}
-                              </a>
-                            </div>
-                            <div className="flex items-center gap-2 text-[#9ca3af]">
-                              <Phone className="h-4 w-4" />
-                              <a href={`tel:${details.recruiter.phone}`} className="hover:text-[#6366f1]">
-                                {details.recruiter.phone}
-                              </a>
+                            <div className="text-sm text-[#9ca3af]">
+                              Contact information will be available once your application is reviewed.
                             </div>
                           </CardContent>
                         </Card>
@@ -677,11 +691,11 @@ export function ApplicationsContent() {
                           <CardContent className="space-y-4">
                             <div>
                               <p className="text-sm font-medium text-[#9ca3af] mb-2">Feedback</p>
-                              <p className="text-[#9ca3af] leading-relaxed">{details.feedback}</p>
+                              <p className="text-[#9ca3af] leading-relaxed">Feedback will be available once your application is reviewed.</p>
                             </div>
                             <div>
                               <p className="text-sm font-medium text-[#9ca3af] mb-2">Next Steps</p>
-                              <p className="text-[#9ca3af] leading-relaxed">{details.nextSteps}</p>
+                              <p className="text-[#9ca3af] leading-relaxed">Wait for the recruiter to review your application. You will be notified of any updates.</p>
                             </div>
                           </CardContent>
                         </Card>

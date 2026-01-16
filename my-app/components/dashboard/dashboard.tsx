@@ -36,22 +36,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-const mockUser = {
-  name: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  phone: "+1 (555) 123-4567",
-  location: "San Francisco, CA",
-  title: "Senior Full Stack Developer",
-  avatar: "AJ",
-  experience: "5+ years",
-  education: "BS Computer Science, Stanford University",
-  skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "Kubernetes"],
-  bio: "Passionate full-stack developer with expertise in modern web technologies. Love building scalable applications and solving complex problems.",
-  resumeUploaded: true,
-  profileComplete: 85,
-  joinedDate: "January 2024",
-};
+import { authAPI, applicationsAPI } from "@/lib/api";
 
 const applications = [
   {
@@ -132,12 +117,6 @@ const recommendations = [
   },
 ];
 
-const stats = [
-  { label: "Applications", value: 12, icon: Briefcase, gradient: "from-[#6366f1] to-[#8b5cf6]" },
-  { label: "Interviews", value: 5, icon: MessageSquare, gradient: "from-[#8b5cf6] to-[#ec4899]" },
-  { label: "Avg Match", value: "94%", icon: TrendingUp, gradient: "from-[#ec4899] to-[#f59e0b]" },
-  { label: "Profile Views", value: 48, icon: Eye, gradient: "from-[#10b981] to-[#6366f1]" },
-];
 
 const quickActions = [
   { title: "Upload Resume", icon: Upload, href: "/resume-scanner", gradient: "from-[#6366f1] to-[#8b5cf6]" },
@@ -199,8 +178,12 @@ export function DashboardContent() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"applications" | "saved" | "recommendations" | "find-jobs">("applications");
   const [savedJobIds, setSavedJobIds] = useState<number[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [userApplications, setUserApplications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadUserData();
     if (typeof window !== "undefined") {
       const savedJobs = localStorage.getItem("savedJobs");
       if (savedJobs) {
@@ -208,6 +191,63 @@ export function DashboardContent() {
       }
     }
   }, []);
+
+  const loadUserData = async () => {
+    try {
+      setIsLoading(true);
+      const profileResponse = await authAPI.getProfile();
+      if (profileResponse.user) {
+        const userData = profileResponse.user;
+        setUser({
+          name: userData.name || "User",
+          email: userData.email || "",
+          phone: userData.phone || "",
+          location: userData.location || "",
+          title: userData.title || "",
+          avatar: userData.name ? userData.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : "U",
+          experience: userData.experience || "",
+          education: userData.education || "",
+          skills: userData.skills ? (typeof userData.skills === 'string' ? userData.skills.split(',') : userData.skills) : [],
+          bio: userData.bio || "",
+          resumeUploaded: !!userData.resume_url,
+          profileComplete: calculateProfileComplete(userData),
+          joinedDate: userData.created_at ? new Date(userData.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "",
+        });
+      }
+
+      const applicationsResponse = await applicationsAPI.getMyApplications();
+      if (applicationsResponse.applications) {
+        setUserApplications(applicationsResponse.applications);
+      }
+    } catch (error) {
+      console.error("Failed to load user data:", error);
+      if (typeof window !== "undefined") {
+        const name = localStorage.getItem("adminName") || localStorage.getItem("userName") || "User";
+        const email = localStorage.getItem("adminEmail") || localStorage.getItem("userEmail") || "";
+        setUser({
+          name,
+          email,
+          avatar: name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase(),
+          profileComplete: 0,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateProfileComplete = (userData: any) => {
+    let complete = 0;
+    if (userData.name) complete += 15;
+    if (userData.email) complete += 10;
+    if (userData.phone) complete += 10;
+    if (userData.location) complete += 10;
+    if (userData.title) complete += 15;
+    if (userData.skills) complete += 15;
+    if (userData.bio) complete += 10;
+    if (userData.resume_url) complete += 10;
+    return Math.min(complete, 100);
+  };
 
   const handleSave = (jobId: number, job: any) => {
     if (typeof window !== "undefined") {
@@ -236,6 +276,13 @@ export function DashboardContent() {
       }
     }
   };
+
+  const stats = [
+    { label: "Applications", value: userApplications.length, icon: Briefcase, gradient: "from-[#6366f1] to-[#8b5cf6]" },
+    { label: "Interviews", value: userApplications.filter((app: any) => app.status === "Interview Scheduled").length, icon: MessageSquare, gradient: "from-[#8b5cf6] to-[#ec4899]" },
+    { label: "Avg Match", value: userApplications.length > 0 ? `${Math.round(userApplications.reduce((sum: number, app: any) => sum + (app.match_score || 0), 0) / userApplications.length)}%` : "0%", icon: TrendingUp, gradient: "from-[#ec4899] to-[#f59e0b]" },
+    { label: "Profile Views", value: 0, icon: Eye, gradient: "from-[#10b981] to-[#6366f1]" },
+  ];
 
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
@@ -277,40 +324,60 @@ export function DashboardContent() {
             <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm mb-8">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-[#6366f1]/30">
-                    {mockUser.avatar}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-2xl sm:text-3xl font-bold text-[#e8e8f0]">{mockUser.name}</h2>
-                      <Badge className="bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Verified
-                      </Badge>
+                  {isLoading ? (
+                    <div className="flex-1">
+                      <div className="h-8 bg-[#1e1e2e] rounded animate-pulse mb-2"></div>
+                      <div className="h-6 bg-[#1e1e2e] rounded animate-pulse w-2/3"></div>
                     </div>
-                    <p className="text-lg text-[#a5b4fc] mb-3">{mockUser.title}</p>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-[#9ca3af]">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{mockUser.location}</span>
+                  ) : user ? (
+                    <>
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-[#6366f1]/30">
+                        {user.avatar}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        <span>{mockUser.email}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h2 className="text-2xl sm:text-3xl font-bold text-[#e8e8f0]">{user.name}</h2>
+                          <Badge className="bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Verified
+                          </Badge>
+                        </div>
+                        {user.title && <p className="text-lg text-[#a5b4fc] mb-3">{user.title}</p>}
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-[#9ca3af]">
+                          {user.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              <span>{user.location}</span>
+                            </div>
+                          )}
+                          {user.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              <span>{user.email}</span>
+                            </div>
+                          )}
+                          {user.experience && (
+                            <div className="flex items-center gap-2">
+                              <BriefcaseIcon className="h-4 w-4" />
+                              <span>{user.experience}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <BriefcaseIcon className="h-4 w-4" />
-                        <span>{mockUser.experience}</span>
-                      </div>
+                    </>
+                  ) : (
+                    <div className="flex-1">
+                      <p className="text-[#9ca3af]">Unable to load user data</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-                  <div className="flex gap-3">
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
-                    >
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                  >
                       <Link href="/jobs">
                         <Search className="h-4 w-4 mr-2" />
                         Find Jobs
@@ -326,7 +393,6 @@ export function DashboardContent() {
                         Upload Resume
                       </Link>
                     </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -340,7 +406,7 @@ export function DashboardContent() {
               </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-2">
                 <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
-                  Welcome Back, {mockUser.name.split(' ')[0]}!
+                  Welcome Back, {user ? user.name.split(' ')[0] : 'User'}!
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-[#9ca3af]">
@@ -809,47 +875,55 @@ export function DashboardContent() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 pb-3 border-b border-[#2a2a3a]">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-[#6366f1]/30">
-                      {mockUser.avatar}
+                      {user ? user.avatar : "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-[#e8e8f0] truncate">{mockUser.name}</h3>
-                      <p className="text-xs text-[#9ca3af] truncate">{mockUser.title}</p>
+                      <h3 className="text-sm font-semibold text-[#e8e8f0] truncate">{user ? user.name : "User"}</h3>
+                      {user?.title && <p className="text-xs text-[#9ca3af] truncate">{user.title}</p>}
                     </div>
                   </div>
 
                   <div className="space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-[#9ca3af]">
-                      <Mail className="h-3 w-3 text-[#6366f1]" />
-                      <span className="truncate">{mockUser.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#9ca3af]">
-                      <MapPin className="h-3 w-3 text-[#6366f1]" />
-                      <span className="truncate">{mockUser.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#9ca3af]">
-                      <BriefcaseIcon className="h-3 w-3 text-[#6366f1]" />
-                      <span className="truncate">{mockUser.experience}</span>
-                    </div>
+                    {user?.email && (
+                      <div className="flex items-center gap-2 text-[#9ca3af]">
+                        <Mail className="h-3 w-3 text-[#6366f1]" />
+                        <span className="truncate">{user.email}</span>
+                      </div>
+                    )}
+                    {user?.location && (
+                      <div className="flex items-center gap-2 text-[#9ca3af]">
+                        <MapPin className="h-3 w-3 text-[#6366f1]" />
+                        <span className="truncate">{user.location}</span>
+                      </div>
+                    )}
+                    {user?.experience && (
+                      <div className="flex items-center gap-2 text-[#9ca3af]">
+                        <BriefcaseIcon className="h-3 w-3 text-[#6366f1]" />
+                        <span className="truncate">{user.experience}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="pt-2 border-t border-[#2a2a3a]">
-                    <p className="text-xs font-semibold text-[#e8e8f0] mb-1.5">Skills</p>
-                    <div className="flex flex-wrap gap-1">
-                      {mockUser.skills.slice(0, 4).map((skill, index) => (
-                        <Badge
-                          key={index}
-                          className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a] text-xs px-1.5 py-0.5"
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                      {mockUser.skills.length > 4 && (
-                        <Badge className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a] text-xs px-1.5 py-0.5">
-                          +{mockUser.skills.length - 4}
-                        </Badge>
-                      )}
+                  {user?.skills && user.skills.length > 0 && (
+                    <div className="pt-2 border-t border-[#2a2a3a]">
+                      <p className="text-xs font-semibold text-[#e8e8f0] mb-1.5">Skills</p>
+                      <div className="flex flex-wrap gap-1">
+                        {user.skills.slice(0, 4).map((skill: string, index: number) => (
+                          <Badge
+                            key={index}
+                            className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a] text-xs px-1.5 py-0.5"
+                          >
+                            {skill}
+                          </Badge>
+                        ))}
+                        {user.skills.length > 4 && (
+                          <Badge className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a] text-xs px-1.5 py-0.5">
+                            +{user.skills.length - 4}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -865,13 +939,13 @@ export function DashboardContent() {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs text-[#9ca3af]">Overall</span>
-                      <span className="text-xs font-semibold bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] bg-clip-text text-transparent">{mockUser.profileComplete}%</span>
+                      <span className="text-xs font-semibold bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] bg-clip-text text-transparent">{user ? user.profileComplete : 0}%</span>
                     </div>
                     <div className="w-full h-1.5 bg-[#2a2a3a] rounded-full overflow-hidden">
                       <motion.div
                         className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
                         initial={{ width: 0 }}
-                        animate={{ width: `${mockUser.profileComplete}%` }}
+                        animate={{ width: `${user ? user.profileComplete : 0}%` }}
                         transition={{ duration: 1, delay: 0.5 }}
                       />
                     </div>

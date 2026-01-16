@@ -13,12 +13,16 @@ import {
   Menu,
   X,
   Building2,
-  Shield
+  Shield,
+  FilePlus,
+  FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: FilePlus, label: "Post Job", href: "/admin/jobs" },
+  { icon: FileText, label: "My Posts", href: "/admin/my-posts" },
   { icon: Briefcase, label: "Applications", href: "/admin/applications" },
   { icon: Building2, label: "Company", href: "/admin/companies" },
   { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },

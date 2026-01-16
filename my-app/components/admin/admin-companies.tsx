@@ -25,6 +25,7 @@ import {
   Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { companiesAPI } from "@/lib/api";
 
 const mockCompanies = [
   {
@@ -159,58 +160,68 @@ const industries = ["All Industries", "Technology", "Finance", "Healthcare", "Ed
 const sizes = ["All Sizes", "Startup (1-50)", "Small (51-200)", "Medium (201-1000)", "Large (1000+)"];
 
 export function AdminCompaniesContent() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
-  const [companies, setCompanies] = useState(mockCompanies);
+  const [company, setCompany] = useState<any>(null);
   const [recruiterCompany, setRecruiterCompany] = useState("TechCorp");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const company = localStorage.getItem("adminCompany") || "TechCorp";
-      setRecruiterCompany(company);
-      
-      const companyData = mockCompanies.find(c => c.name === company);
-      if (companyData) {
-        setSelectedCompany(companyData.id);
-      } else {
-        setSelectedCompany(1);
-      }
+      const companyName = localStorage.getItem("adminCompany") || "TechCorp";
+      setRecruiterCompany(companyName);
     }
+    loadCompany();
   }, []);
 
-  const filteredCompanies = recruiterCompany
-    ? companies.filter((company) => company.name === recruiterCompany)
-    : companies.filter((company) => company.name === "TechCorp");
-
-  const selectedCompanyData = selectedCompany
-    ? companies.find(c => c.id === selectedCompany && c.name === recruiterCompany)
-    : null;
-
-  const toggleFeatured = (companyId: number) => {
-    const companyToUpdate = companies.find(c => c.id === companyId);
-    if (companyToUpdate && companyToUpdate.name === recruiterCompany) {
-      setCompanies(prev =>
-        prev.map(company =>
-          company.id === companyId && company.name === recruiterCompany
-            ? { ...company, featured: !company.featured }
-            : company
-        )
-      );
+  const loadCompany = async () => {
+    try {
+      setIsLoading(true);
+      const response = await companiesAPI.getMyCompany();
+      setCompany(response.company);
+    } catch (error) {
+      console.error("Failed to load company:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const toggleVerified = (companyId: number) => {
-    const companyToUpdate = companies.find(c => c.id === companyId);
-    if (companyToUpdate && companyToUpdate.name === recruiterCompany) {
-      setCompanies(prev =>
-        prev.map(company =>
-          company.id === companyId && company.name === recruiterCompany
-            ? { ...company, verified: !company.verified }
-            : company
-        )
-      );
+  const filteredCompanies = company ? [company] : [];
+
+  const selectedCompanyData = company;
+
+  const toggleFeatured = async (companyId: number) => {
+    if (!company) return;
+    try {
+      await companiesAPI.updateMyCompany({
+        ...company,
+        featured: !company.featured,
+      });
+      await loadCompany();
+    } catch (error) {
+      console.error("Failed to update company:", error);
     }
   };
+
+  const toggleVerified = async (companyId: number) => {
+    if (!company) return;
+    try {
+      await companiesAPI.updateMyCompany({
+        ...company,
+        verified: !company.verified,
+      });
+      await loadCompany();
+    } catch (error) {
+      console.error("Failed to update company:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-16 lg:pt-8 flex items-center justify-center">
+        <p className="text-[#9ca3af]">Loading company information...</p>
+      </div>
+    );
+  }
 
 
   return (

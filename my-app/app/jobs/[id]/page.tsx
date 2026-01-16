@@ -10,7 +10,6 @@ import {
   MapPin,
   Briefcase,
   Clock,
-  DollarSign,
   Star,
   ArrowLeft,
   CheckCircle2,
@@ -21,139 +20,81 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-const jobDetails: { [key: number]: any } = {
-  1: {
-    id: 1,
-    title: "Senior Full Stack Developer",
-    company: "TechCorp",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "₹10L - ₹15L",
-    posted: "2 days ago",
-    match: 98,
-    skills: ["React", "Node.js", "TypeScript", "AWS"],
-    description: "Join our innovative team to build cutting-edge web applications using modern technologies.",
-    fullDescription: "We are looking for an experienced Senior Full Stack Developer to join our dynamic team. You will be responsible for designing, developing, and maintaining scalable web applications. The ideal candidate should have strong expertise in React, Node.js, and cloud technologies.",
-    requirements: [
-      "5+ years of experience in full-stack development",
-      "Strong proficiency in React, Node.js, and TypeScript",
-      "Experience with AWS cloud services",
-      "Knowledge of database design and optimization",
-      "Excellent problem-solving and communication skills"
-    ],
-    benefits: [
-      "Competitive salary and equity package",
-      "Comprehensive health insurance",
-      "Flexible working hours and remote options",
-      "Professional development opportunities",
-      "401(k) matching program"
-    ],
-    companyInfo: "TechCorp is a leading technology company focused on innovation and excellence. We provide cutting-edge solutions to clients worldwide.",
-  },
-  2: {
-    id: 2,
-    title: "UX/UI Designer",
-    company: "Design Studio",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹7.5L - ₹11L",
-    posted: "1 day ago",
-    match: 95,
-    skills: ["Figma", "Adobe XD", "User Research", "Prototyping"],
-    description: "Create beautiful and intuitive user experiences for our digital products.",
-    fullDescription: "We're seeking a talented UX/UI Designer to join our creative team. You'll work on designing user interfaces and experiences for web and mobile applications, collaborating closely with product managers and developers.",
-    requirements: [
-      "3+ years of UX/UI design experience",
-      "Proficiency in Figma and Adobe XD",
-      "Strong portfolio showcasing user-centered design",
-      "Experience with user research and testing",
-      "Knowledge of design systems and component libraries"
-    ],
-    benefits: [
-      "Remote work flexibility",
-      "Health and dental insurance",
-      "Annual design conference budget",
-      "Latest design tools and software",
-      "Collaborative and creative work environment"
-    ],
-    companyInfo: "Design Studio is a creative agency specializing in digital product design and user experience.",
-  },
-  3: {
-    id: 3,
-    title: "Product Manager",
-    company: "StartupXYZ",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "₹9L - ₹13L",
-    posted: "3 days ago",
-    match: 92,
-    skills: ["Product Strategy", "Agile", "Analytics", "Roadmapping"],
-    description: "Lead product development and work closely with engineering and design teams.",
-    fullDescription: "Join our product team as a Product Manager and drive the vision and execution of our product roadmap. You'll work cross-functionally with engineering, design, and business teams to deliver exceptional products.",
-    requirements: [
-      "4+ years of product management experience",
-      "Strong analytical and strategic thinking skills",
-      "Experience with Agile methodologies",
-      "Excellent communication and leadership abilities",
-      "Technical background preferred"
-    ],
-    benefits: [
-      "Competitive compensation package",
-      "Stock options",
-      "Health insurance",
-      "Flexible PTO",
-      "Learning and development budget"
-    ],
-    companyInfo: "StartupXYZ is a fast-growing startup focused on innovation and growth.",
-  },
-  4: {
-    id: 4,
-    title: "Data Scientist",
-    company: "DataLabs",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹11L - ₹16L",
-    posted: "5 days ago",
-    match: 89,
-    skills: ["Python", "Machine Learning", "SQL", "TensorFlow"],
-    description: "Build and deploy machine learning models to solve complex business problems.",
-    fullDescription: "We're looking for a Data Scientist to join our analytics team. You'll work on developing machine learning models, analyzing large datasets, and providing data-driven insights to support business decisions.",
-    requirements: [
-      "Master's degree in Data Science, Statistics, or related field",
-      "3+ years of experience in data science",
-      "Strong programming skills in Python",
-      "Experience with machine learning frameworks",
-      "Knowledge of SQL and database systems"
-    ],
-    benefits: [
-      "Remote work options",
-      "Competitive salary",
-      "Health and wellness programs",
-      "Research publication support",
-      "Access to cutting-edge tools and datasets"
-    ],
-    companyInfo: "DataLabs is a research-driven company specializing in data science and machine learning solutions.",
-  },
-};
+import { jobsAPI } from "@/lib/api";
+import { Combobox } from "@/components/ui/combobox";
 
 export default function JobDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const jobId = Number(params.id);
-  const job = jobDetails[jobId];
+  const [job, setJob] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const userRole = localStorage.getItem("userRole");
+      const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+      
+      if (userRole === "admin" || isAdminLoggedIn) {
+        router.push("/admin/applications");
+        return;
+      }
+      
       const loggedIn = localStorage.getItem("isLoggedIn") === "true";
       setIsLoggedIn(loggedIn);
       
       const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
       setIsApplied(appliedJobs.includes(jobId));
     }
-  }, [jobId]);
+    loadJob();
+  }, [jobId, router]);
+
+  const loadJob = async () => {
+    try {
+      setIsLoading(true);
+      const response = await jobsAPI.getById(jobId);
+      if (response.job) {
+        const formattedJob = {
+          id: response.job.id,
+          title: response.job.title,
+          company: response.job.company_name || "",
+          location: response.job.location || "",
+          type: response.job.type || "Full-time",
+          salary: response.job.salary_min && response.job.salary_max 
+            ? `₹${(response.job.salary_min / 100000).toFixed(1)}L - ₹${(response.job.salary_max / 100000).toFixed(1)}L`
+            : response.job.salary_min 
+            ? `₹${(response.job.salary_min / 100000).toFixed(1)}L+`
+            : "Not specified",
+          posted: response.job.created_at ? getTimeAgo(new Date(response.job.created_at)) : "",
+          match: 0,
+          skills: response.job.skills_required ? (typeof response.job.skills_required === 'string' ? response.job.skills_required.split(',') : response.job.skills_required) : [],
+          description: response.job.description || "",
+          fullDescription: response.job.description || "",
+          requirements: [],
+          benefits: [],
+          companyInfo: "",
+        };
+        setJob(formattedJob);
+      }
+    } catch (error) {
+      console.error("Failed to load job:", error);
+      setJob(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  };
 
   const handleApply = () => {
     if (!isLoggedIn) {
@@ -185,6 +126,16 @@ export default function JobDetailsPage() {
       localStorage.setItem("userApplications", JSON.stringify(existingApplications));
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-[#e8e8f0] mb-4">Loading...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -305,6 +256,32 @@ export default function JobDetailsPage() {
           <div className="space-y-6">
             <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm sticky top-24">
               <CardContent className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
+                    Quick Actions
+                  </label>
+                  <Combobox
+                    options={[
+                      { value: "apply", label: "Apply Now" },
+                      { value: "save", label: "Save Job" },
+                      { value: "share", label: "Share Job" },
+                      { value: "report", label: "Report Job" },
+                    ]}
+                    placeholder="Select an action..."
+                    className="w-full"
+                    onValueChange={(value) => {
+                      if (value === "apply") {
+                        handleApply();
+                      } else if (value === "save") {
+                        const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
+                        if (!savedJobs.includes(jobId)) {
+                          savedJobs.push(jobId);
+                          localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
+                        }
+                      }
+                    }}
+                  />
+                </div>
                 {isApplied ? (
                   <Button
                     disabled

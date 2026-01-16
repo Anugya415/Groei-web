@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TrendingUp,
@@ -13,34 +14,85 @@ import {
   Activity
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const mockStats = {
-  totalApplications: 24,
-  applicationsChange: 12,
-  interviewRate: 33,
-  interviewRateChange: 5,
-  averageMatch: 91,
-  averageMatchChange: 3,
-  responseTime: "3.2 days",
-  responseTimeChange: -0.5,
-};
-
-const statusDistribution = [
-  { status: "Interview Scheduled", count: 8, percentage: 33, color: "#10b981" },
-  { status: "Under Review", count: 10, percentage: 42, color: "#6366f1" },
-  { status: "Application Sent", count: 4, percentage: 17, color: "#f59e0b" },
-  { status: "Rejected", count: 2, percentage: 8, color: "#ef4444" },
-];
-
-const monthlyApplications = [
-  { month: "Aug", count: 3 },
-  { month: "Sep", count: 5 },
-  { month: "Oct", count: 7 },
-  { month: "Nov", count: 6 },
-  { month: "Dec", count: 3 },
-];
+import { applicationsAPI } from "@/lib/api";
 
 export function AnalyticsContent() {
+  const [stats, setStats] = useState({
+    totalApplications: 0,
+    applicationsChange: 0,
+    interviewRate: 0,
+    interviewRateChange: 0,
+    averageMatch: 0,
+    averageMatchChange: 0,
+    responseTime: "0 days",
+    responseTimeChange: 0,
+  });
+  const [statusDistribution, setStatusDistribution] = useState<any[]>([]);
+  const [monthlyApplications, setMonthlyApplications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, []);
+
+  const loadAnalytics = async () => {
+    try {
+      setIsLoading(true);
+      const response = await applicationsAPI.getMyApplications();
+      if (response.applications) {
+        const apps = response.applications;
+        const total = apps.length;
+        const interviews = apps.filter((app: any) => app.status === "Interview Scheduled").length;
+        const interviewRate = total > 0 ? Math.round((interviews / total) * 100) : 0;
+        const avgMatch = total > 0 
+          ? Math.round(apps.reduce((sum: number, app: any) => sum + (app.match_score || 0), 0) / total)
+          : 0;
+
+        const statusCounts: { [key: string]: number } = {};
+        apps.forEach((app: any) => {
+          const status = app.status || "Application Sent";
+          statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
+
+        const distribution = Object.entries(statusCounts).map(([status, count]) => ({
+          status,
+          count,
+          percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+          color: status === "Interview Scheduled" ? "#10b981" : 
+                 status === "Under Review" ? "#6366f1" :
+                 status === "Application Sent" ? "#f59e0b" : "#ef4444",
+        }));
+
+        const monthlyData: { [key: string]: number } = {};
+        apps.forEach((app: any) => {
+          if (app.applied_at) {
+            const date = new Date(app.applied_at);
+            const month = date.toLocaleDateString('en-US', { month: 'short' });
+            monthlyData[month] = (monthlyData[month] || 0) + 1;
+          }
+        });
+
+        const monthly = Object.entries(monthlyData).map(([month, count]) => ({ month, count }));
+
+        setStats({
+          totalApplications: total,
+          applicationsChange: 0,
+          interviewRate,
+          interviewRateChange: 0,
+          averageMatch: avgMatch,
+          averageMatchChange: 0,
+          responseTime: "0 days",
+          responseTimeChange: 0,
+        });
+        setStatusDistribution(distribution);
+        setMonthlyApplications(monthly);
+      }
+    } catch (error) {
+      console.error("Failed to load analytics:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
       <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
@@ -72,19 +124,19 @@ export function AnalyticsContent() {
                   <div className="p-3 rounded-lg bg-[#6366f1]/20">
                     <Briefcase className="h-6 w-6 text-[#6366f1]" />
                   </div>
-                  {mockStats.applicationsChange > 0 ? (
+                  {stats.applicationsChange > 0 ? (
                     <div className="flex items-center gap-1 text-[#10b981]">
                       <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-semibold">+{mockStats.applicationsChange}%</span>
+                      <span className="text-sm font-semibold">+{stats.applicationsChange}%</span>
                     </div>
-                  ) : (
+                  ) : stats.applicationsChange < 0 ? (
                     <div className="flex items-center gap-1 text-[#ef4444]">
                       <TrendingDown className="h-4 w-4" />
-                      <span className="text-sm font-semibold">{mockStats.applicationsChange}%</span>
+                      <span className="text-sm font-semibold">{stats.applicationsChange}%</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{mockStats.totalApplications}</h3>
+                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{stats.totalApplications}</h3>
                 <p className="text-sm text-[#9ca3af]">Total Applications</p>
               </CardContent>
             </Card>
@@ -95,19 +147,19 @@ export function AnalyticsContent() {
                   <div className="p-3 rounded-lg bg-[#10b981]/20">
                     <CheckCircle2 className="h-6 w-6 text-[#10b981]" />
                   </div>
-                  {mockStats.interviewRateChange > 0 ? (
+                  {stats.interviewRateChange > 0 ? (
                     <div className="flex items-center gap-1 text-[#10b981]">
                       <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-semibold">+{mockStats.interviewRateChange}%</span>
+                      <span className="text-sm font-semibold">+{stats.interviewRateChange}%</span>
                     </div>
-                  ) : (
+                  ) : stats.interviewRateChange < 0 ? (
                     <div className="flex items-center gap-1 text-[#ef4444]">
                       <TrendingDown className="h-4 w-4" />
-                      <span className="text-sm font-semibold">{mockStats.interviewRateChange}%</span>
+                      <span className="text-sm font-semibold">{stats.interviewRateChange}%</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{mockStats.interviewRate}%</h3>
+                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{stats.interviewRate}%</h3>
                 <p className="text-sm text-[#9ca3af]">Interview Rate</p>
               </CardContent>
             </Card>
@@ -118,19 +170,19 @@ export function AnalyticsContent() {
                   <div className="p-3 rounded-lg bg-[#8b5cf6]/20">
                     <Target className="h-6 w-6 text-[#8b5cf6]" />
                   </div>
-                  {mockStats.averageMatchChange > 0 ? (
+                  {stats.averageMatchChange > 0 ? (
                     <div className="flex items-center gap-1 text-[#10b981]">
                       <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-semibold">+{mockStats.averageMatchChange}%</span>
+                      <span className="text-sm font-semibold">+{stats.averageMatchChange}%</span>
                     </div>
-                  ) : (
+                  ) : stats.averageMatchChange < 0 ? (
                     <div className="flex items-center gap-1 text-[#ef4444]">
                       <TrendingDown className="h-4 w-4" />
-                      <span className="text-sm font-semibold">{mockStats.averageMatchChange}%</span>
+                      <span className="text-sm font-semibold">{stats.averageMatchChange}%</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{mockStats.averageMatch}%</h3>
+                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{stats.averageMatch}%</h3>
                 <p className="text-sm text-[#9ca3af]">Average Match</p>
               </CardContent>
             </Card>
@@ -141,19 +193,19 @@ export function AnalyticsContent() {
                   <div className="p-3 rounded-lg bg-[#f59e0b]/20">
                     <Clock className="h-6 w-6 text-[#f59e0b]" />
                   </div>
-                  {mockStats.responseTimeChange > 0 ? (
-                    <div className="flex items-center gap-1 text-[#ef4444]">
-                      <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-semibold">+{mockStats.responseTimeChange}</span>
-                    </div>
-                  ) : (
+                  {stats.responseTimeChange > 0 ? (
                     <div className="flex items-center gap-1 text-[#10b981]">
-                      <TrendingDown className="h-4 w-4" />
-                      <span className="text-sm font-semibold">{mockStats.responseTimeChange}</span>
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-sm font-semibold">+{stats.responseTimeChange}</span>
                     </div>
-                  )}
+                  ) : stats.responseTimeChange < 0 ? (
+                    <div className="flex items-center gap-1 text-[#ef4444]">
+                      <TrendingDown className="h-4 w-4" />
+                      <span className="text-sm font-semibold">{stats.responseTimeChange}</span>
+                    </div>
+                  ) : null}
                 </div>
-                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{mockStats.responseTime}</h3>
+                <h3 className="text-3xl font-bold text-[#e8e8f0] mb-1">{stats.responseTime}</h3>
                 <p className="text-sm text-[#9ca3af]">Avg Response Time</p>
               </CardContent>
             </Card>

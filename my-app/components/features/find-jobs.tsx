@@ -20,111 +20,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { jobsAPI } from "@/lib/api";
 
 const jobTypes = ["All", "Full-time", "Part-time", "Contract", "Freelance", "Internship"];
 const locations = ["All Locations", "Remote", "New York", "San Francisco", "London", "Toronto", "Berlin"];
 const experienceLevels = ["All Levels", "Entry", "Mid", "Senior", "Executive"];
-
-const jobs = [
-  {
-    id: 1,
-    title: "Senior Full Stack Developer",
-    company: "TechCorp",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "₹10L - ₹15L",
-    posted: "2 days ago",
-    match: 98,
-    skills: ["React", "Node.js", "TypeScript", "AWS"],
-    description: "Join our innovative team to build cutting-edge web applications using modern technologies.",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "UX/UI Designer",
-    company: "Design Studio",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹7.5L - ₹11L",
-    posted: "1 day ago",
-    match: 95,
-    skills: ["Figma", "Adobe XD", "User Research", "Prototyping"],
-    description: "Create beautiful and intuitive user experiences for our digital products.",
-    featured: true,
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "StartupXYZ",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "₹9L - ₹13L",
-    posted: "3 days ago",
-    match: 92,
-    skills: ["Product Strategy", "Agile", "Analytics", "Roadmapping"],
-    description: "Lead product development and work closely with engineering and design teams.",
-  },
-  {
-    id: 4,
-    title: "Data Scientist",
-    company: "DataLabs",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹11L - ₹16L",
-    posted: "5 days ago",
-    match: 89,
-    skills: ["Python", "Machine Learning", "SQL", "TensorFlow"],
-    description: "Build and deploy machine learning models to solve complex business problems.",
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    company: "CloudTech",
-    location: "Toronto, ON",
-    type: "Full-time",
-    salary: "₹8L - ₹12L",
-    posted: "1 week ago",
-    match: 87,
-    skills: ["Docker", "Kubernetes", "CI/CD", "AWS"],
-    description: "Manage infrastructure and deployment pipelines for scalable applications.",
-  },
-  {
-    id: 6,
-    title: "Marketing Director",
-    company: "BrandCo",
-    location: "London, UK",
-    type: "Full-time",
-    salary: "₹8L - ₹12L",
-    posted: "4 days ago",
-    match: 85,
-    skills: ["Digital Marketing", "SEO", "Content Strategy", "Analytics"],
-    description: "Lead marketing initiatives and drive brand growth across multiple channels.",
-  },
-  {
-    id: 7,
-    title: "Frontend Developer",
-    company: "WebSolutions",
-    location: "Remote",
-    type: "Contract",
-    salary: "₹6.5L - ₹10L",
-    posted: "2 days ago",
-    match: 94,
-    skills: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
-    description: "Build responsive and performant web applications with modern frameworks.",
-  },
-  {
-    id: 8,
-    title: "Backend Developer",
-    company: "API Systems",
-    location: "Berlin, Germany",
-    type: "Full-time",
-    salary: "₹7L - ₹10L",
-    posted: "6 days ago",
-    match: 91,
-    skills: ["Python", "Django", "PostgreSQL", "REST APIs"],
-    description: "Design and implement scalable backend systems and APIs.",
-  },
-];
 
 export function FindJobsContent() {
   const router = useRouter();
@@ -137,8 +37,11 @@ export function FindJobsContent() {
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [selectedJob, setSelectedJob] = useState<{ id: number; title: string; company: string } | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadJobs();
     if (typeof window !== "undefined") {
       const loggedIn = localStorage.getItem("isLoggedIn") === "true";
       setIsLoggedIn(loggedIn);
@@ -148,7 +51,63 @@ export function FindJobsContent() {
         setAppliedJobs(JSON.parse(savedAppliedJobs));
       }
     }
-  }, []);
+  }, [selectedType, selectedLocation]);
+
+  const loadJobs = async () => {
+    try {
+      setIsLoading(true);
+      const params: any = {};
+      if (searchQuery) params.search = searchQuery;
+      if (selectedType !== "All") params.type = selectedType;
+      if (selectedLocation !== "All Locations") params.location = selectedLocation;
+      
+      const response = await jobsAPI.getAll(params);
+      if (response.jobs) {
+        const formattedJobs = response.jobs.map((job: any) => ({
+          id: job.id,
+          title: job.title,
+          company: job.company_name || "",
+          location: job.location || "",
+          type: job.type || "Full-time",
+          salary: job.salary_min && job.salary_max 
+            ? `₹${(job.salary_min / 100000).toFixed(1)}L - ₹${(job.salary_max / 100000).toFixed(1)}L`
+            : job.salary_min 
+            ? `₹${(job.salary_min / 100000).toFixed(1)}L+`
+            : "Not specified",
+          posted: job.created_at ? getTimeAgo(new Date(job.created_at)) : "",
+          match: 0,
+          skills: job.skills_required ? (typeof job.skills_required === 'string' ? job.skills_required.split(',') : job.skills_required) : [],
+          description: job.description || "",
+          featured: false,
+        }));
+        setJobs(formattedJobs);
+      }
+    } catch (error) {
+      console.error("Failed to load jobs:", error);
+      setJobs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery !== undefined) {
+        loadJobs();
+      }
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const handleApply = (jobId: number) => {
     if (!isLoggedIn) {

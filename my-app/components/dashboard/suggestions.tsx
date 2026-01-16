@@ -22,83 +22,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { jobsAPI } from "@/lib/api";
 
-const suggestedJobs = [
-  {
-    id: 1,
-    jobTitle: "Senior Full Stack Developer",
-    company: "TechCorp",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "₹10L - ₹15L",
-    posted: "2 days ago",
-    match: 98,
-    skills: ["React", "Node.js", "TypeScript", "AWS"],
-    featured: true,
-    reason: "Matches your React and Node.js experience",
-  },
-  {
-    id: 2,
-    jobTitle: "UX/UI Designer",
-    company: "Design Studio",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹7.5L - ₹11L",
-    posted: "1 day ago",
-    match: 95,
-    skills: ["Figma", "Adobe XD", "User Research", "Prototyping"],
-    featured: true,
-    reason: "Strong match with your design background",
-  },
-  {
-    id: 3,
-    jobTitle: "Product Manager",
-    company: "StartupXYZ",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "₹9L - ₹13L",
-    posted: "3 days ago",
-    match: 92,
-    skills: ["Product Strategy", "Agile", "Analytics", "Roadmapping"],
-    reason: "Aligns with your product experience",
-  },
-  {
-    id: 4,
-    jobTitle: "Data Scientist",
-    company: "DataLabs",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹11L - ₹16L",
-    posted: "5 days ago",
-    match: 89,
-    skills: ["Python", "Machine Learning", "SQL", "TensorFlow"],
-    reason: "Matches your Python and ML skills",
-  },
-  {
-    id: 5,
-    jobTitle: "DevOps Engineer",
-    company: "CloudTech",
-    location: "Seattle, WA",
-    type: "Full-time",
-    salary: "₹12L - ₹17L",
-    posted: "4 days ago",
-    match: 87,
-    skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-    reason: "Matches your cloud infrastructure experience",
-  },
-  {
-    id: 6,
-    jobTitle: "Frontend Developer",
-    company: "WebSolutions",
-    location: "Remote",
-    type: "Full-time",
-    salary: "₹8L - ₹12L",
-    posted: "6 days ago",
-    match: 91,
-    skills: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
-    reason: "Perfect match for your frontend skills",
-  },
-];
 
 const jobTypes = ["All", "Full-time", "Part-time", "Contract", "Remote"];
 const locations = ["All Locations", "Remote", "San Francisco", "New York", "Seattle"];
@@ -109,8 +34,11 @@ export function SuggestionsContent() {
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [showFilters, setShowFilters] = useState(false);
   const [savedJobIds, setSavedJobIds] = useState<number[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadSuggestions();
     if (typeof window !== "undefined") {
       const savedJobs = localStorage.getItem("savedJobs");
       if (savedJobs) {
@@ -118,7 +46,49 @@ export function SuggestionsContent() {
         setSavedJobIds(parsed.map((job: any) => job.id));
       }
     }
-  }, []);
+  }, [selectedType, selectedLocation]);
+
+  const loadSuggestions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await jobsAPI.getAll();
+      if (response.jobs) {
+        const formattedJobs = response.jobs.slice(0, 10).map((job: any) => ({
+          id: job.id,
+          jobTitle: job.title,
+          company: job.company_name || "",
+          location: job.location || "",
+          type: job.type || "Full-time",
+          salary: job.salary_min && job.salary_max 
+            ? `₹${(job.salary_min / 100000).toFixed(1)}L - ₹${(job.salary_max / 100000).toFixed(1)}L`
+            : job.salary_min 
+            ? `₹${(job.salary_min / 100000).toFixed(1)}L+`
+            : "Not specified",
+          posted: job.created_at ? getTimeAgo(new Date(job.created_at)) : "",
+          match: 0,
+          skills: job.skills_required ? (typeof job.skills_required === 'string' ? job.skills_required.split(',') : job.skills_required) : [],
+          featured: false,
+          reason: "Recommended based on your profile",
+        }));
+        setJobs(formattedJobs);
+      }
+    } catch (error) {
+      console.error("Failed to load suggestions:", error);
+      setJobs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  };
 
   const handleSave = (jobId: number, job: any) => {
     if (typeof window !== "undefined") {
@@ -148,7 +118,7 @@ export function SuggestionsContent() {
     }
   };
 
-  const filteredJobs = suggestedJobs.filter((job) => {
+  const filteredJobs = jobs.filter((job) => {
     const matchesSearch = 
       job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase());

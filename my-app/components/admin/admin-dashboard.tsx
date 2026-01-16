@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { adminAPI } from "@/lib/api";
 
 const mockStats = {
   totalUsers: 1248,
@@ -159,34 +160,57 @@ const getStats = (companyStats: {
 
 export function AdminDashboardContent() {
   const [company, setCompany] = useState("TechCorp");
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const recruiterCompany = localStorage.getItem("adminCompany") || "TechCorp";
       setCompany(recruiterCompany);
     }
+    loadDashboard();
   }, []);
 
-  const companyApplications = recentApplications.filter(app => app.company === company);
-  const companyUsers = recentUsers.filter(user => user.applications > 0);
+  const loadDashboard = async () => {
+    try {
+      setIsLoading(true);
+      const response = await adminAPI.getDashboard();
+      setDashboardData(response);
+    } catch (error) {
+      console.error("Failed to load dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading || !dashboardData) {
+    return (
+      <div className="min-h-screen pt-16 lg:pt-8 flex items-center justify-center">
+        <p className="text-[#9ca3af]">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  const stats = dashboardData.stats || {};
+  const recentApplications = dashboardData.recent_applications || [];
   
-  const totalApplications = companyApplications.length;
-  const interviewsScheduled = companyApplications.filter(app => app.status === "Interview Scheduled").length;
-  const pendingApplications = companyApplications.filter(app => app.status === "Under Review" || app.status === "Application Sent").length;
-  const rejectedApplications = companyApplications.filter(app => app.status === "Rejected").length;
-  const acceptedApplications = companyApplications.filter(app => app.status === "Accepted").length;
-  const underReviewApplications = companyApplications.filter(app => app.status === "Under Review").length;
+  const totalApplications = stats.total_applications || 0;
+  const interviewsScheduled = stats.interviews_scheduled || 0;
+  const pendingApplications = stats.pending || 0;
+  const rejectedApplications = stats.rejected || 0;
+  const acceptedApplications = stats.accepted || 0;
+  const underReviewApplications = stats.under_review || 0;
   
   const previousMonthApplications = Math.max(0, totalApplications - 15);
   const applicationsGrowth = totalApplications > 0 ? ((totalApplications - previousMonthApplications) / previousMonthApplications * 100) : 0;
   
   const companyStats = {
-    totalUsers: companyUsers.length,
+    totalUsers: 0,
     usersGrowth: 8.5,
     activeApplications: totalApplications,
     applicationsGrowth: applicationsGrowth > 0 ? applicationsGrowth : 0,
     interviewsScheduled: interviewsScheduled,
-    newUsersToday: companyUsers.length > 0 ? Math.floor(companyUsers.length * 0.1) : 0,
+    newUsersToday: 0,
     pendingApplications: pendingApplications,
     rejectedApplications: rejectedApplications,
     acceptedApplications: acceptedApplications,
@@ -292,38 +316,27 @@ export function AdminDashboardContent() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {companyUsers.length > 0 ? companyUsers.map((user, index) => (
+                  {recentApplications.length > 0 ? recentApplications.slice(0, 5).map((app: any, index: number) => (
                     <motion.div
-                      key={user.id}
+                      key={app.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                     >
                       <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-[#1e1e2e] transition-colors">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-[#6366f1]/30">
-                          {user.name.split(' ').map(n => n[0]).join('')}
+                          {app.applicant_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-semibold text-[#e8e8f0] truncate">{user.name}</p>
+                            <p className="text-sm font-semibold text-[#e8e8f0] truncate">{app.applicant_name || 'Applicant'}</p>
                             <Badge className="bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30 text-xs">
-                              {user.status}
+                              Applied
                             </Badge>
                           </div>
-                          <p className="text-xs text-[#9ca3af] truncate">{user.title}</p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-[#6b7280]">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {user.location}
-                            </span>
-                            <span>•</span>
-                            <span>{user.joinedDate}</span>
-                          </div>
+                          <p className="text-xs text-[#9ca3af] truncate">{app.job_title || 'Job Application'}</p>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
-                            {user.applications} apps
-                          </Badge>
                           <Button variant="ghost" size="sm" className="h-7 text-xs" disabled>
                             <Eye className="h-3 w-3" />
                           </Button>
@@ -349,7 +362,7 @@ export function AdminDashboardContent() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {companyApplications.length > 0 ? companyApplications.map((app, index) => (
+                  {recentApplications.length > 0 ? recentApplications.map((app, index) => (
                     <motion.div
                       key={app.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -362,7 +375,7 @@ export function AdminDashboardContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-semibold text-[#e8e8f0]">{app.applicantName}</p>
+                            <p className="text-sm font-semibold text-[#e8e8f0]">{app.applicant_name || 'Applicant'}</p>
                             <Badge className={`text-xs ${
                               app.status === "Interview Scheduled" ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30" :
                               app.status === "Under Review" ? "bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30" :
@@ -371,12 +384,16 @@ export function AdminDashboardContent() {
                               {app.status}
                             </Badge>
                           </div>
-                          <p className="text-xs text-[#a5b4fc] mb-1">{app.jobTitle}</p>
-                          <p className="text-xs text-[#9ca3af]">{app.company}</p>
+                          <p className="text-xs text-[#a5b4fc] mb-1">{app.job_title || 'Job'}</p>
+                          <p className="text-xs text-[#9ca3af]">{app.job_location || ''}</p>
                           <div className="flex items-center gap-3 mt-1 text-xs text-[#6b7280]">
-                            <span>{app.appliedDate}</span>
-                            <span>•</span>
-                            <span className="text-[#6366f1]">{app.match}% match</span>
+                            <span>{new Date(app.applied_at).toLocaleDateString()}</span>
+                            {app.match_score && (
+                              <>
+                                <span>•</span>
+                                <span className="text-[#6366f1]">{app.match_score}% match</span>
+                              </>
+                            )}
                           </div>
                         </div>
                         <Button variant="ghost" size="sm" asChild className="h-7 text-xs">

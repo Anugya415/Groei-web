@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,82 +23,51 @@ import {
   CalendarDays
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const mockInterviews = [
-  {
-    id: 1,
-    jobTitle: "Senior Full Stack Developer",
-    company: "TechCorp",
-    date: "Dec 15, 2024",
-    time: "10:00 AM",
-    type: "Video Call",
-    status: "Scheduled",
-    interviewer: "Sarah Johnson",
-    location: "Zoom Meeting",
-    match: 98,
-    meetingLink: "https://zoom.us/j/1234567890",
-    meetingId: "123 456 7890",
-    meetingPassword: "TechCorp2024",
-    interviewerEmail: "sarah.johnson@techcorp.com",
-    interviewerPhone: "+1 (555) 123-4567",
-  },
-  {
-    id: 2,
-    jobTitle: "Data Scientist",
-    company: "DataLabs",
-    date: "Dec 18, 2024",
-    time: "2:00 PM",
-    type: "On-site",
-    status: "Scheduled",
-    interviewer: "Michael Chen",
-    location: "123 Tech Street, San Francisco",
-    match: 89,
-    meetingLink: null,
-    meetingId: null,
-    meetingPassword: null,
-    interviewerEmail: "michael.chen@datalabs.com",
-    interviewerPhone: "+1 (555) 234-5678",
-  },
-  {
-    id: 3,
-    jobTitle: "Product Manager",
-    company: "StartupXYZ",
-    date: "Dec 12, 2024",
-    time: "11:30 AM",
-    type: "Phone Call",
-    status: "Completed",
-    interviewer: "Emily Davis",
-    location: "Phone: +1 (555) 123-4567",
-    match: 92,
-    meetingLink: null,
-    meetingId: null,
-    meetingPassword: null,
-    interviewerEmail: "emily.davis@startupxyz.com",
-    interviewerPhone: "+1 (555) 345-6789",
-    feedback: "Strong product thinking and communication skills. Proceeded to next round.",
-  },
-  {
-    id: 4,
-    jobTitle: "UX/UI Designer",
-    company: "Design Studio",
-    date: "Dec 20, 2024",
-    time: "3:30 PM",
-    type: "Video Call",
-    status: "Scheduled",
-    interviewer: "Alex Thompson",
-    location: "Google Meet",
-    match: 95,
-    meetingLink: "https://meet.google.com/abc-defg-hij",
-    meetingId: "abc-defg-hij",
-    meetingPassword: null,
-    interviewerEmail: "alex.thompson@designstudio.com",
-    interviewerPhone: "+1 (555) 456-7890",
-  },
-];
+import { applicationsAPI } from "@/lib/api";
 
 export function InterviewsContent() {
   const [filter, setFilter] = useState("All");
-  const [interviews, setInterviews] = useState(mockInterviews);
+  const [interviews, setInterviews] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadInterviews();
+  }, [filter]);
+
+  const loadInterviews = async () => {
+    try {
+      setIsLoading(true);
+      const response = await applicationsAPI.getMyApplications();
+      if (response.applications) {
+        const interviewApplications = response.applications.filter((app: any) => 
+          app.status === "Interview Scheduled" && app.interview_date
+        );
+        const formattedInterviews = interviewApplications.map((app: any) => ({
+          id: app.id,
+          jobTitle: app.job_title || "",
+          company: app.company_name || "",
+          date: app.interview_date ? new Date(app.interview_date).toLocaleDateString() : "",
+          time: app.interview_date ? new Date(app.interview_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+          type: "Video Call",
+          status: "Scheduled",
+          interviewer: "",
+          location: "",
+          match: app.match_score || 0,
+          meetingLink: null,
+          meetingId: null,
+          meetingPassword: null,
+          interviewerEmail: "",
+          interviewerPhone: "",
+        }));
+        setInterviews(formattedInterviews);
+      }
+    } catch (error) {
+      console.error("Failed to load interviews:", error);
+      setInterviews([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const [selectedInterview, setSelectedInterview] = useState<number | null>(null);
   const [actionType, setActionType] = useState<"join" | "reschedule" | "cancel" | "feedback" | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");

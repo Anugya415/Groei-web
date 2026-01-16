@@ -27,6 +27,7 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { applicationsAPI } from "@/lib/api";
 
 const mockApplications = [
   {
@@ -132,9 +133,10 @@ export function AdminApplicationsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
-  const [applications, setApplications] = useState(mockApplications);
+  const [applications, setApplications] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState<"date" | "match" | "name">("date");
   const [company, setCompany] = useState("TechCorp");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -146,64 +148,101 @@ export function AdminApplicationsContent() {
       if (appId) {
         const id = parseInt(appId);
         if (!isNaN(id)) {
-          const app = applications.find(a => a.id === id);
-          if (app) {
-            setSelectedApplication(id);
-          }
+          setSelectedApplication(id);
         }
       }
     }
   }, []);
 
-  const companyApplications = company 
-    ? applications.filter((app) => app.company === company)
-    : applications.filter((app) => app.company === "TechCorp");
+  useEffect(() => {
+    loadApplications();
+  }, [statusFilter]);
+
+  const loadApplications = async () => {
+    try {
+      setIsLoading(true);
+      const params: any = {};
+      if (statusFilter !== "All") {
+        params.status = statusFilter;
+      }
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+      const response = await applicationsAPI.getCompanyApplications(params);
+      if (response && response.applications) {
+        setApplications(response.applications);
+      } else {
+        setApplications([]);
+      }
+    } catch (error: any) {
+      console.error("Failed to load applications:", error);
+      setApplications([]);
+      const errorMsg = error.message || error.error || "Failed to load applications";
+      if (errorMsg.includes("Company not assigned") || errorMsg.includes("Company association required")) {
+        alert("Your account is not assigned to a company. Please contact support or update your profile.");
+      } else if (errorMsg.includes("Admin access required")) {
+        alert("You don't have admin access. Please contact support.");
+      } else {
+        console.error("Application loading error details:", error);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery !== undefined) {
+        loadApplications();
+      }
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const companyApplications = applications;
 
   const filteredApplications = companyApplications
-    .filter((app) => {
+    .filter((app: any) => {
       const matchesSearch =
-        app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.applicantEmail.toLowerCase().includes(searchQuery.toLowerCase());
+        (app.applicant_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (app.job_title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (app.company_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (app.applicant_email || '').toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "All" || app.status === statusFilter;
       return matchesSearch && matchesStatus;
     })
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       if (sortBy === "date") {
-        return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
+        return new Date(b.applied_at || 0).getTime() - new Date(a.applied_at || 0).getTime();
       } else if (sortBy === "match") {
-        return b.match - a.match;
+        return (b.match_score || 0) - (a.match_score || 0);
       } else {
-        return a.applicantName.localeCompare(b.applicantName);
+        return (a.applicant_name || '').localeCompare(b.applicant_name || '');
       }
     });
 
   const statusCounts = {
     All: companyApplications.length,
-    "Interview Scheduled": companyApplications.filter(a => a.status === "Interview Scheduled").length,
-    "Under Review": companyApplications.filter(a => a.status === "Under Review").length,
-    "Application Sent": companyApplications.filter(a => a.status === "Application Sent").length,
-    "Rejected": companyApplications.filter(a => a.status === "Rejected").length,
-    "Accepted": companyApplications.filter(a => a.status === "Accepted").length,
+    "Interview Scheduled": companyApplications.filter((a: any) => a.status === "Interview Scheduled").length,
+    "Under Review": companyApplications.filter((a: any) => a.status === "Under Review").length,
+    "Application Sent": companyApplications.filter((a: any) => a.status === "Application Sent").length,
+    "Rejected": companyApplications.filter((a: any) => a.status === "Rejected").length,
+    "Accepted": companyApplications.filter((a: any) => a.status === "Accepted").length,
   };
 
   const selectedAppData = selectedApplication
-    ? companyApplications.find(a => a.id === selectedApplication && a.company === company)
+    ? companyApplications.find(a => a.id === selectedApplication)
     : null;
 
-  const updateApplicationStatus = (appId: number, newStatus: string) => {
-    if (!company) return;
-    const appToUpdate = companyApplications.find(app => app.id === appId);
-    if (appToUpdate && appToUpdate.company === company) {
-      setApplications(prev =>
-        prev.map(app =>
-          app.id === appId && app.company === company ? { ...app, status: newStatus } : app
-        )
-      );
+  const updateApplicationStatus = async (appId: number, newStatus: string) => {
+    try {
+      await applicationsAPI.updateStatus(appId, { status: newStatus });
+      await loadApplications();
       if (selectedApplication === appId) {
         setSelectedApplication(null);
       }
+    } catch (error) {
+      console.error("Failed to update application status:", error);
     }
   };
 
@@ -301,34 +340,28 @@ export function AdminApplicationsContent() {
                           <div>
                             <div className="flex items-center gap-3 mb-2">
                               <User className="h-5 w-5 text-[#6366f1]" />
-                              <h3 className="text-xl font-bold text-[#e8e8f0]">{application.applicantName}</h3>
+                              <h3 className="text-xl font-bold text-[#e8e8f0]">{application.applicant_name || 'Applicant'}</h3>
                             </div>
-                            <p className="text-lg text-[#a5b4fc] mb-2">{application.jobTitle}</p>
+                            <p className="text-lg text-[#a5b4fc] mb-2">{application.job_title || 'Job'}</p>
                             <div className="flex items-center gap-2 mb-2">
                               <Building2 className="h-4 w-4 text-[#9ca3af]" />
-                              <span className="text-sm text-[#9ca3af]">{application.company}</span>
+                              <span className="text-sm text-[#9ca3af]">{application.company_name || ''}</span>
                             </div>
                             <div className="flex flex-wrap items-center gap-4 text-sm text-[#9ca3af]">
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <span>{application.location}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[#6366f1] font-semibold">₹</span>
-                                <span>{application.salary}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Briefcase className="h-4 w-4" />
-                                <span>{application.type}</span>
-                              </div>
+                              {application.job_location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{application.job_location}</span>
+                                </div>
+                              )}
                               <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
-                                <span>Applied: {new Date(application.appliedDate).toLocaleDateString()}</span>
+                                <span>Applied: {new Date(application.applied_at || Date.now()).toLocaleDateString()}</span>
                               </div>
-                              {application.interviewDate && (
+                              {application.interview_date && (
                                 <div className="flex items-center gap-2">
                                   <Clock className="h-4 w-4 text-[#6366f1]" />
-                                  <span className="text-[#6366f1]">Interview: {application.interviewDate}</span>
+                                  <span className="text-[#6366f1]">Interview: {new Date(application.interview_date).toLocaleDateString()}</span>
                                 </div>
                               )}
                             </div>
@@ -337,9 +370,11 @@ export function AdminApplicationsContent() {
                             <Badge className={statusColors[application.status as keyof typeof statusColors]}>
                               {application.status}
                             </Badge>
-                            <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
-                              {application.match}% match
-                            </Badge>
+                            {application.match_score && (
+                              <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
+                                {application.match_score}% match
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -353,6 +388,27 @@ export function AdminApplicationsContent() {
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
+                        {application.status !== "Accepted" && application.status !== "Rejected" && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => updateApplicationStatus(application.id, "Accepted")}
+                              className="flex-1 bg-[#10b981] text-white hover:bg-[#059669] border-0"
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateApplicationStatus(application.id, "Rejected")}
+                              className="flex-1 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
                         <Button
                           variant="outline"
                           className="border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
@@ -368,7 +424,13 @@ export function AdminApplicationsContent() {
             ))}
           </div>
 
-          {filteredApplications.length === 0 && (
+          {isLoading ? (
+            <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm">
+              <CardContent className="p-12 text-center">
+                <p className="text-[#9ca3af]">Loading applications...</p>
+              </CardContent>
+            </Card>
+          ) : filteredApplications.length === 0 && (
             <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm">
               <CardContent className="p-12 text-center">
                 <Briefcase className="h-16 w-16 text-[#6366f1] mx-auto mb-4 opacity-50" />
@@ -438,23 +500,23 @@ export function AdminApplicationsContent() {
                 <CardContent className="p-6 space-y-6">
                   <div>
                     <h3 className="text-xl font-bold text-[#e8e8f0] mb-4">
-                      {selectedAppData.jobTitle} - {selectedAppData.company}
+                      {selectedAppData.job_title || 'Job'} - {selectedAppData.company_name || ''}
                     </h3>
                     <div className="flex items-center gap-4 text-sm text-[#9ca3af] mb-6">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{selectedAppData.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#6366f1] font-semibold">₹</span>
-                        <span>{selectedAppData.salary}</span>
-                      </div>
+                      {selectedAppData.job_location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{selectedAppData.job_location}</span>
+                        </div>
+                      )}
                       <Badge className={statusColors[selectedAppData.status as keyof typeof statusColors]}>
                         {selectedAppData.status}
                       </Badge>
-                      <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
-                        {selectedAppData.match}% match
-                      </Badge>
+                      {selectedAppData.match_score && (
+                        <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
+                          {selectedAppData.match_score}% match
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -468,28 +530,32 @@ export function AdminApplicationsContent() {
                     <CardContent className="space-y-3">
                       <div>
                         <p className="text-sm font-medium text-[#9ca3af] mb-1">Name</p>
-                        <p className="text-[#e8e8f0]">{selectedAppData.applicantName}</p>
+                        <p className="text-[#e8e8f0]">{selectedAppData.applicant_name || 'N/A'}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-[#6366f1]" />
-                        <a href={`mailto:${selectedAppData.applicantEmail}`} className="text-[#6366f1] hover:underline">
-                          {selectedAppData.applicantEmail}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-[#6366f1]" />
-                        <a href={`tel:${selectedAppData.applicantPhone}`} className="text-[#6366f1] hover:underline">
-                          {selectedAppData.applicantPhone}
-                        </a>
-                      </div>
+                      {selectedAppData.applicant_email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-[#6366f1]" />
+                          <a href={`mailto:${selectedAppData.applicant_email}`} className="text-[#6366f1] hover:underline">
+                            {selectedAppData.applicant_email}
+                          </a>
+                        </div>
+                      )}
+                      {selectedAppData.applicant_phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-[#6366f1]" />
+                          <a href={`tel:${selectedAppData.applicant_phone}`} className="text-[#6366f1] hover:underline">
+                            {selectedAppData.applicant_phone}
+                          </a>
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-medium text-[#9ca3af] mb-1">Applied Date</p>
-                        <p className="text-[#e8e8f0]">{new Date(selectedAppData.appliedDate).toLocaleDateString()}</p>
+                        <p className="text-[#e8e8f0]">{new Date(selectedAppData.applied_at || Date.now()).toLocaleDateString()}</p>
                       </div>
-                      {selectedAppData.interviewDate && (
+                      {selectedAppData.interview_date && (
                         <div>
                           <p className="text-sm font-medium text-[#9ca3af] mb-1">Interview Date</p>
-                          <p className="text-[#e8e8f0]">{selectedAppData.interviewDate}</p>
+                          <p className="text-[#e8e8f0]">{new Date(selectedAppData.interview_date).toLocaleDateString()}</p>
                         </div>
                       )}
                     </CardContent>
@@ -500,33 +566,59 @@ export function AdminApplicationsContent() {
                       <CardTitle className="text-lg font-bold text-[#e8e8f0]">Application Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div>
-                        <p className="text-sm font-medium text-[#9ca3af] mb-1">Resume Version</p>
-                        <p className="text-[#e8e8f0]">{selectedAppData.resumeVersion}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#9ca3af] mb-2">Cover Letter</p>
-                        <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.coverLetter}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#9ca3af] mb-2">Notes</p>
-                        <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.notes}</p>
-                      </div>
+                      {selectedAppData.resume_url && (
+                        <div>
+                          <p className="text-sm font-medium text-[#9ca3af] mb-1">Resume</p>
+                          <a href={selectedAppData.resume_url} target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:underline">
+                            View Resume
+                          </a>
+                        </div>
+                      )}
+                      {selectedAppData.cover_letter && (
+                        <div>
+                          <p className="text-sm font-medium text-[#9ca3af] mb-2">Cover Letter</p>
+                          <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.cover_letter}</p>
+                        </div>
+                      )}
+                      {selectedAppData.notes && (
+                        <div>
+                          <p className="text-sm font-medium text-[#9ca3af] mb-2">Notes</p>
+                          <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.notes}</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
                   <Card className="border border-[#2a2a3a] bg-[#1e1e2e]">
                     <CardHeader>
-                      <CardTitle className="text-lg font-bold text-[#e8e8f0]">Update Status</CardTitle>
+                      <CardTitle className="text-lg font-bold text-[#e8e8f0]">Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <div className="flex gap-3 mb-4">
+                        <Button
+                          onClick={() => updateApplicationStatus(selectedAppData.id, "Accepted")}
+                          className="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:from-[#059669] hover:to-[#047857] border-0"
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() => updateApplicationStatus(selectedAppData.id, "Rejected")}
+                          variant="outline"
+                          className="flex-1 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10 hover:border-[#ef4444]"
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Reject
+                        </Button>
+                      </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {statusOptions.map((status) => (
                           <Button
                             key={status}
                             variant={selectedAppData.status === status ? "default" : "outline"}
                             onClick={() => updateApplicationStatus(selectedAppData.id, status)}
-                            className={`${
+                            size="sm"
+                            className={`text-xs ${
                               selectedAppData.status === status
                                 ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0"
                                 : "border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
@@ -544,10 +636,16 @@ export function AdminApplicationsContent() {
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Contact Applicant
                     </Button>
-                    <Button variant="outline" className="flex-1 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50">
-                      <FileText className="h-4 w-4 mr-2" />
-                      View Resume
-                    </Button>
+                    {selectedAppData.resume_url && (
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                        onClick={() => window.open(selectedAppData.resume_url, '_blank')}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Resume
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

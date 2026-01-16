@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,29 +20,85 @@ import {
   Upload
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const initialProfile = {
-  name: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  phone: "+1 (555) 123-4567",
-  location: "San Francisco, CA",
-  title: "Senior Full Stack Developer",
-  bio: "Passionate full-stack developer with expertise in modern web technologies. Love building scalable applications and solving complex problems.",
-  experience: "5+ years",
-  education: "BS Computer Science, Stanford University",
-  skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "Kubernetes"],
-  linkedin: "linkedin.com/in/alexjohnson",
-  github: "github.com/alexjohnson",
-  portfolio: "alexjohnson.dev",
-};
+import { authAPI } from "@/lib/api";
 
 export function ProfileContent() {
-  const [profile, setProfile] = useState(initialProfile);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    title: "",
+    bio: "",
+    experience: "",
+    education: "",
+    skills: [] as string[],
+    linkedin: "",
+    github: "",
+    portfolio: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [newSkill, setNewSkill] = useState("");
 
-  const handleSave = () => {
-    setIsEditing(false);
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.getProfile();
+      if (response.user) {
+        const userData = response.user;
+        setProfile({
+          name: userData.name || "",
+          email: userData.email || "",
+          phone: userData.phone || "",
+          location: userData.location || "",
+          title: userData.title || "",
+          bio: userData.bio || "",
+          experience: userData.experience || "",
+          education: userData.education || "",
+          skills: userData.skills ? (typeof userData.skills === 'string' ? userData.skills.split(',').map(s => s.trim()) : userData.skills) : [],
+          linkedin: userData.linkedin || "",
+          github: userData.github || "",
+          portfolio: userData.portfolio || "",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      const updateData: any = {
+        phone: profile.phone || null,
+        location: profile.location || null,
+        title: profile.title || null,
+        bio: profile.bio || null,
+        experience: profile.experience || null,
+        education: profile.education || null,
+        skills: profile.skills.join(',') || null,
+        linkedin: profile.linkedin || null,
+        github: profile.github || null,
+        portfolio: profile.portfolio || null,
+      };
+
+      await authAPI.updateProfile(updateData);
+      setIsEditing(false);
+      await loadProfile();
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      alert("Failed to save profile. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAddSkill = () => {
@@ -55,6 +111,14 @@ export function ProfileContent() {
   const handleRemoveSkill = (skill: string) => {
     setProfile({ ...profile, skills: profile.skills.filter((s) => s !== skill) });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-16 lg:pt-8 flex items-center justify-center bg-[#0a0a0f]">
+        <p className="text-[#9ca3af]">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
@@ -85,10 +149,11 @@ export function ProfileContent() {
                 {isEditing ? (
                   <Button
                     onClick={handleSave}
-                    className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0"
+                    disabled={isSaving}
+                    className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 disabled:opacity-50"
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
                 ) : (
                   <Button

@@ -23,6 +23,7 @@ import {
   Globe
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { adminAPI, authAPI } from "@/lib/api";
 
 const mockAdmin = {
   name: "Sarah Johnson",
@@ -51,59 +52,77 @@ export function AdminSettingsContent() {
   const [saveType, setSaveType] = useState<"account" | "notifications" | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const company = localStorage.getItem("adminCompany") || "TechCorp";
-      const name = localStorage.getItem("adminName") || "Recruiter";
-      const email = localStorage.getItem("adminEmail") || "recruiter@techcorp.com";
-      
-      setAdminData(prev => ({
-        ...prev,
-        company,
-        name,
-        email,
-      }));
-
-      const savedNotificationSettings = localStorage.getItem("adminNotificationSettings");
-      const savedAdminData = localStorage.getItem("adminAccountData");
-      
-      if (savedNotificationSettings) {
-        try {
-          const parsed = JSON.parse(savedNotificationSettings);
-          setSettings(prev => ({ ...prev, ...parsed }));
-        } catch (e) {
-          console.error("Error parsing notification settings", e);
-        }
-      }
-
-      if (savedAdminData) {
-        try {
-          const parsed = JSON.parse(savedAdminData);
-          setAdminData(prev => ({ ...prev, ...parsed }));
-        } catch (e) {
-          console.error("Error parsing admin data", e);
-        }
-      }
-    }
+    loadProfile();
+    loadSettings();
   }, []);
 
-  const handleSave = (type: "account" | "notifications") => {
-    if (typeof window !== "undefined") {
-      if (type === "notifications") {
-        localStorage.setItem("adminNotificationSettings", JSON.stringify(settings));
-      } else if (type === "account") {
-        localStorage.setItem("adminAccountData", JSON.stringify({
-          name: adminData.name,
-          email: adminData.email,
-          phone: adminData.phone,
+  const loadProfile = async () => {
+    try {
+      const response = await authAPI.getProfile();
+      if (response.user) {
+        setAdminData(prev => ({
+          ...prev,
+          name: response.user.name,
+          email: response.user.email,
+          company: response.user.company_name || localStorage.getItem("adminCompany") || "TechCorp",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load profile:", error);
+      if (typeof window !== "undefined") {
+        const company = localStorage.getItem("adminCompany") || "TechCorp";
+        const name = localStorage.getItem("adminName") || "Recruiter";
+        const email = localStorage.getItem("adminEmail") || "recruiter@techcorp.com";
+        setAdminData(prev => ({
+          ...prev,
+          company,
+          name,
+          email,
         }));
       }
     }
-    setSaveType(type);
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setSaveType(null);
-    }, 3000);
+  };
+
+  const loadSettings = async () => {
+    try {
+      const response = await adminAPI.getSettings();
+      if (response.settings) {
+        setSettings(prev => ({
+          ...prev,
+          emailNotifications: response.settings.email_notifications ?? true,
+          applicationAlerts: response.settings.application_alerts ?? true,
+          weeklyReports: response.settings.weekly_reports ?? true,
+          systemUpdates: response.settings.system_updates ?? true,
+          smsNotifications: response.settings.sms_notifications ?? false,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load settings:", error);
+    }
+  };
+
+  const handleSave = async (type: "account" | "notifications") => {
+    try {
+      if (type === "notifications") {
+        await adminAPI.updateSettings({
+          email_notifications: settings.emailNotifications,
+          application_alerts: settings.applicationAlerts,
+          weekly_reports: settings.weeklyReports,
+          system_updates: settings.systemUpdates,
+          sms_notifications: settings.smsNotifications,
+        });
+      } else if (type === "account") {
+        await authAPI.getProfile();
+      }
+      setSaveType(type);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setSaveType(null);
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to save:", error);
+    }
   };
 
   const tabs = [

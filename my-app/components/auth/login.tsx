@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Sparkles, Mail, Lock, ArrowRight, Github } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { authAPI } from "@/lib/api";
 
 export function LoginContent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -28,39 +30,56 @@ export function LoginContent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
     
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await authAPI.login(email, password);
+      
       if (typeof window !== "undefined") {
         localStorage.setItem("isLoggedIn", "true");
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirect = urlParams.get("redirect");
+        localStorage.setItem("userRole", response.user.role);
+        if (response.token) {
+          localStorage.setItem("authToken", response.token);
+        }
         
-        const adminEmails: { [key: string]: string } = {
-          "sarah.johnson@techcorp.com": "TechCorp",
-          "admin@example.com": "TechCorp",
-          "recruiter@example.com": "TechCorp"
-        };
-        const isAdmin = adminEmails.hasOwnProperty(email.toLowerCase());
-        
-        if (isAdmin) {
+        if (response.user.role === "admin") {
           localStorage.setItem("isAdminLoggedIn", "true");
-          localStorage.setItem("userRole", "admin");
-          localStorage.setItem("adminCompany", adminEmails[email.toLowerCase()]);
-          localStorage.setItem("adminEmail", email);
-          const adminNames: { [key: string]: string } = {
-            "sarah.johnson@techcorp.com": "Sarah Johnson",
-            "admin@example.com": "Admin User",
-            "recruiter@example.com": "Recruiter"
-          };
-          localStorage.setItem("adminName", adminNames[email.toLowerCase()] || "Recruiter");
+          if (response.user.company_id) {
+            localStorage.setItem("adminCompany", response.user.company_name || "");
+          }
+          if (response.user.name) {
+            localStorage.setItem("adminName", response.user.name);
+          }
+          if (response.user.email) {
+            localStorage.setItem("adminEmail", response.user.email);
+          }
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get("redirect");
           router.push(redirect || "/admin");
         } else {
-          localStorage.setItem("userRole", "user");
-          router.push(redirect || "/dashboard");
+          router.push("/dashboard");
         }
       }
-    }, 1000);
+    } catch (err: any) {
+      let errorMessage = "Login failed. Please check your credentials.";
+      
+      if (err && err.message) {
+        const msg = err.message.toLowerCase();
+        if (msg.includes("connect to server") || msg.includes("failed to fetch") || msg.includes("network")) {
+          errorMessage = "Unable to connect to server. Please make sure the backend is running on http://localhost:8080";
+        } else if (msg.includes("database not initialized")) {
+          errorMessage = "Database not initialized. Please run 'npm run init-db' in the backend folder.";
+        } else if (msg.includes("invalid credentials") || msg.includes("invalid email") || msg.includes("invalid password")) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,6 +149,11 @@ export function LoginContent() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {error && (
+                    <div className="p-3 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444] text-sm">
+                      {error}
+                    </div>
+                  )}
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="email" className="text-sm font-medium text-[#e8e8f0]">
