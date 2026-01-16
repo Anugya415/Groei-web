@@ -95,7 +95,7 @@ export function DashboardContent() {
           ))}
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -161,7 +161,7 @@ export function DashboardContent() {
       </section>
 
       {/* Main Content */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 md:pb-20">
+      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 md:pb-20">
         <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Applications */}
           <div className="lg:col-span-2 space-y-6">
@@ -373,4 +373,5 @@ export function DashboardContent() {
     </div>
   );
 }
+
 

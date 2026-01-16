@@ -60,18 +60,19 @@ const companies = [
   },
   {
     id: 3,
-    name: "StartupXYZ",
+    name: "CloudTech",
     industry: "Technology",
-    location: "New York, NY",
-    size: "Startup (1-50)",
-    employees: "35",
-    jobs: 8,
-    description: "Fast-growing startup revolutionizing the fintech industry.",
-    website: "startupxyz.com",
-    founded: 2020,
-    rating: 4.7,
+    location: "Toronto, ON",
+    size: "Small (51-200)",
+    employees: "180",
+    jobs: 10,
+    description: "Cloud infrastructure and DevOps solutions provider.",
+    website: "cloudtech.com",
+    founded: 2016,
+    rating: 4.8,
     verified: true,
-    logo: "SX",
+    featured: true,
+    logo: "CT",
   },
   {
     id: 4,
@@ -84,27 +85,13 @@ const companies = [
     description: "Data science company providing AI and machine learning solutions.",
     website: "datalabs.com",
     founded: 2018,
-    rating: 4.6,
+    rating: 4.7,
     verified: true,
+    featured: true,
     logo: "DL",
   },
   {
     id: 5,
-    name: "CloudTech",
-    industry: "Technology",
-    location: "Toronto, ON",
-    size: "Small (51-200)",
-    employees: "180",
-    jobs: 10,
-    description: "Cloud infrastructure and DevOps solutions provider.",
-    website: "cloudtech.com",
-    founded: 2016,
-    rating: 4.8,
-    verified: true,
-    logo: "CT",
-  },
-  {
-    id: 6,
     name: "BrandCo",
     industry: "E-commerce",
     location: "London, UK",
@@ -114,9 +101,26 @@ const companies = [
     description: "E-commerce platform connecting brands with customers worldwide.",
     website: "brandco.com",
     founded: 2012,
-    rating: 4.5,
+    rating: 4.6,
     verified: true,
+    featured: true,
     logo: "BC",
+  },
+  {
+    id: 6,
+    name: "InnovateHub",
+    industry: "Technology",
+    location: "New York, NY",
+    size: "Large (1000+)",
+    employees: "2,500+",
+    jobs: 32,
+    description: "Innovation-driven company transforming industries through technology.",
+    website: "innovatehub.com",
+    founded: 2014,
+    rating: 4.9,
+    verified: true,
+    featured: true,
+    logo: "IH",
   },
 ];
 
@@ -127,7 +131,9 @@ export function CompaniesContent() {
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredCompanies = companies.filter((company) => {
+  const topCompanies = companies.filter(company => company.featured);
+  
+  const filteredCompanies = topCompanies.filter((company) => {
     const matchesSearch = 
       company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       company.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -142,18 +148,19 @@ export function CompaniesContent() {
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 bg-white dark:bg-slate-950 overflow-hidden">
+      <section className="relative py-6 sm:py-8 md:py-10 bg-[#0a0a0f] overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(5)].map((_, i) => (
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
+          {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute rounded-full blur-3xl"
               style={{
-                width: `${200 + i * 50}px`,
-                height: `${200 + i * 50}px`,
-                background: `radial-gradient(circle, rgba(4, 31, 43, ${0.08 + i * 0.02}) 0%, transparent 70%)`,
+                width: `${250 + i * 60}px`,
+                height: `${250 + i * 60}px`,
+                background: `radial-gradient(circle, rgba(99, 102, 241, ${0.12 - i * 0.015}) 0%, transparent 70%)`,
                 left: `${10 + i * 20}%`,
                 top: `${10 + i * 15}%`,
               }}
@@ -171,24 +178,26 @@ export function CompaniesContent() {
           ))}
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12 space-y-4"
+            className="text-center mb-8 space-y-3"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 dark:bg-slate-950/60 backdrop-blur-sm border-0 mb-4">
-              <Sparkles className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151520]/50 backdrop-blur-sm border border-[#6366f1]/20 mb-3">
+              <Sparkles className="h-4 w-4 text-[#6366f1]" />
+              <span className="text-xs font-medium text-[#a5b4fc] uppercase tracking-wide">
                 Top Companies
               </span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Explore Companies
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+                Top Companies
+              </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              Discover top companies hiring and find your perfect workplace
+            <p className="text-base sm:text-lg md:text-xl text-[#9ca3af] max-w-3xl mx-auto">
+              Discover leading companies actively hiring and find your perfect workplace
             </p>
           </motion.div>
 
@@ -199,30 +208,30 @@ export function CompaniesContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="max-w-4xl mx-auto"
           >
-            <Card className="border-0 bg-white/70 dark:bg-slate-950/70 backdrop-blur-md shadow-xl">
+            <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-md shadow-xl shadow-[#6366f1]/10">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9ca3af]" />
                     <Input
                       type="text"
                       placeholder="Search companies, industries, or locations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base border-2 border-slate-200 dark:border-slate-800 focus:border-[#041F2B] dark:focus:border-[#041F2B]"
+                      className="pl-10 h-12 text-base border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
                     />
                   </div>
                   <Button
                     onClick={() => setShowFilters(!showFilters)}
                     variant="outline"
-                    className="h-12 px-6 border-2 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="h-12 px-6 border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                   >
                     <Filter className="h-4 w-4 mr-2" />
                     Filters
                   </Button>
                   <Button
                     size="lg"
-                    className="h-12 px-8 bg-gradient-to-r from-[#041F2B] to-[#0d4a63] text-white hover:from-[#052a3a] hover:to-[#0a3d52] border-0 shadow-lg"
+                    className="h-12 px-8 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30"
                   >
                     <Search className="h-4 w-4 mr-2" />
                     Search
@@ -235,17 +244,17 @@ export function CompaniesContent() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4"
+                    className="mt-6 pt-6 border-t border-[#2a2a3a] space-y-4"
                   >
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
                           Industry
                         </label>
                         <select
                           value={selectedIndustry}
                           onChange={(e) => setSelectedIndustry(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-[#041F2B]"
+                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
                         >
                           {industries.map((industry) => (
                             <option key={industry} value={industry}>
@@ -298,23 +307,23 @@ export function CompaniesContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap items-center justify-center gap-8 mt-8 text-sm text-slate-600 dark:text-slate-400"
+            className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mt-8 text-sm sm:text-base text-[#9ca3af]"
           >
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-[#041F2B]" />
-              <span className="font-semibold text-slate-900 dark:text-slate-100">{companies.length}+</span>
-              <span>Companies</span>
+              <TrendingUp className="h-5 w-5 text-[#6366f1]" />
+              <span className="font-semibold text-[#e8e8f0]">{topCompanies.length}</span>
+              <span>Top Companies</span>
             </div>
             <div className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-[#041F2B]" />
-              <span className="font-semibold text-slate-900 dark:text-slate-100">
-                {companies.reduce((sum, c) => sum + c.jobs, 0)}+
+              <Briefcase className="h-5 w-5 text-[#6366f1]" />
+              <span className="font-semibold text-[#e8e8f0]">
+                {topCompanies.reduce((sum, c) => sum + c.jobs, 0)}+
               </span>
               <span>Open Positions</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-[#041F2B]" />
-              <span className="font-semibold text-slate-900 dark:text-slate-100">100%</span>
+              <CheckCircle2 className="h-5 w-5 text-[#6366f1]" />
+              <span className="font-semibold text-[#e8e8f0]">100%</span>
               <span>Verified</span>
             </div>
           </motion.div>
@@ -322,91 +331,103 @@ export function CompaniesContent() {
       </section>
 
       {/* Company Listings */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {filteredCompanies.length} Companies Found
-          </h2>
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10"
+        >
+          <div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-2">
+              {filteredCompanies.length} Top Companies
+            </h2>
+            <p className="text-sm sm:text-base text-[#9ca3af]">
+              Leading companies actively hiring on GROEI
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-[#9ca3af]">
             <span>Sort by:</span>
-            <select className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-              <option>Most Jobs</option>
+            <select className="px-3 py-1.5 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] text-sm">
               <option>Highest Rated</option>
+              <option>Most Jobs</option>
               <option>Largest</option>
               <option>Newest</option>
             </select>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {filteredCompanies.map((company, index) => (
             <motion.div
               key={company.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
             >
-              <Card className="group relative overflow-hidden border-0 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-950 transition-all duration-500 hover:shadow-2xl hover:shadow-[#041F2B]/10 dark:hover:shadow-[#041F2B]/20 h-full flex flex-col">
+              <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#6366f1]/10 h-full flex flex-col">
                 <motion.div
-                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#041F2B] to-[#0d4a63] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
                   whileHover={{ scaleX: 1 }}
                 />
                 
                 {company.featured && (
-                  <Badge className="absolute top-4 right-4 bg-gradient-to-r from-[#041F2B] to-[#0d4a63] text-white border-0 z-10">
+                  <Badge className="absolute top-4 right-4 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0 z-10 shadow-lg shadow-[#6366f1]/30">
                     Featured
                   </Badge>
                 )}
 
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#041F2B] to-[#0d4a63] flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[#6366f1]/30">
                       <span className="text-xl font-bold text-white">{company.logo}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <CardTitle className="text-xl sm:text-2xl text-slate-900 dark:text-slate-100 group-hover:text-[#041F2B] dark:group-hover:text-[#0d4a63] transition-colors">
+                        <CardTitle className="text-xl sm:text-2xl md:text-3xl text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
                           {company.name}
                         </CardTitle>
                         {company.verified && (
-                          <CheckCircle2 className="h-5 w-5 text-[#041F2B] flex-shrink-0" />
+                          <CheckCircle2 className="h-5 w-5 text-[#6366f1] flex-shrink-0" title="Verified Company" />
                         )}
                       </div>
                       
                       <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-0">
+                        <Badge variant="secondary" className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a]">
                           {company.industry}
                         </Badge>
                         <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-[#041F2B] text-[#041F2B]" />
-                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{company.rating}</span>
+                          <Star className="h-4 w-4 fill-[#6366f1] text-[#6366f1]" />
+                          <span className="text-sm font-semibold text-[#e8e8f0]">{company.rating}</span>
                         </div>
                       </div>
 
-                      <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      <div className="space-y-2 text-sm text-[#9ca3af] mb-4">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
+                          <MapPin className="h-4 w-4 flex-shrink-0" />
                           <span>{company.location}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
+                          <Users className="h-4 w-4 flex-shrink-0" />
                           <span>{company.size} • {company.employees} employees</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4" />
+                          <Briefcase className="h-4 w-4 flex-shrink-0" />
                           <span className="font-semibold text-slate-900 dark:text-slate-100">{company.jobs} open positions</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4" />
+                          <Globe className="h-4 w-4 flex-shrink-0" />
                           <span>{company.website}</span>
                         </div>
                       </div>
 
-                      <CardDescription className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 mb-4">
+                      <CardDescription className="text-sm leading-relaxed text-[#9ca3af] mb-3">
                         {company.description}
                       </CardDescription>
 
-                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-[#9ca3af]">
                         <span>Founded {company.founded}</span>
                       </div>
                     </div>
@@ -418,13 +439,13 @@ export function CompaniesContent() {
                     <Button
                       asChild
                       variant="outline"
-                      className="flex-1 border-2 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="flex-1 border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                     >
                       <Link href={`/companies/${company.id}`}>View Jobs</Link>
                     </Button>
                     <Button
                       asChild
-                      className="flex-1 bg-gradient-to-r from-[#041F2B] to-[#0d4a63] text-white hover:from-[#052a3a] hover:to-[#0a3d52] border-0 shadow-lg"
+                      className="flex-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30"
                     >
                       <Link href={`/companies/${company.id}`}>View Company</Link>
                     </Button>
@@ -441,7 +462,7 @@ export function CompaniesContent() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <p className="text-xl text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-xl text-[#9ca3af] mb-4">
               No companies found matching your criteria
             </p>
             <Button
@@ -461,4 +482,5 @@ export function CompaniesContent() {
     </div>
   );
 }
+
 

@@ -37,10 +37,10 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-white dark:bg-slate-950">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-8 sm:gap-12 mb-8 sm:mb-12">
+    <footer className="relative bg-[#0a0a0f] border-t border-[#2a2a3a]">
+      <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+        <div className="mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-8 sm:gap-12 mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -49,12 +49,16 @@ export function Footer() {
             className="col-span-2 md:col-span-2 space-y-6"
           >
             <Link href="/" className="inline-block group">
-              <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                GROEI
-              </span>
-              <span className="block w-0 h-0.5 bg-slate-900 dark:bg-slate-100 group-hover:w-full transition-all duration-300"></span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#ec4899] flex items-center justify-center shadow-lg shadow-[#6366f1]/30">
+                  <span className="text-white font-bold text-lg">G</span>
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent tracking-tight">
+                  GROEI
+                </span>
+              </div>
             </Link>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
+            <p className="text-sm text-[#9ca3af] max-w-md leading-relaxed">
               AI-powered freelance marketplace & job portal connecting talented professionals with top companies worldwide.
             </p>
             <div className="flex items-center gap-3">
@@ -72,10 +76,10 @@ export function Footer() {
                   >
                     <Link
                       href={social.href}
-                      className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors group"
+                      className="w-11 h-11 rounded-xl bg-[#151520] hover:bg-[#1e1e2e] border border-[#2a2a3a] hover:border-[#6366f1]/50 flex items-center justify-center transition-all duration-300 group"
                       aria-label={social.label}
                     >
-                      <Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-100 transition-colors" />
+                      <Icon className="h-5 w-5 text-[#9ca3af] group-hover:text-[#6366f1] transition-colors" />
                     </Link>
                   </motion.div>
                 );
@@ -92,13 +96,13 @@ export function Footer() {
               transition={{ delay: categoryIndex * 0.1, duration: 0.6 }}
               className="space-y-4"
             >
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 capitalize">{category}</h3>
+              <h3 className="font-semibold text-[#e8e8f0] capitalize">{category}</h3>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.name}>
                     <Link 
                       href={link.href} 
-                      className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors inline-block hover:translate-x-1 transform duration-200"
+                      className="text-sm text-[#9ca3af] hover:text-[#6366f1] transition-colors inline-block hover:translate-x-1 transform duration-200"
                     >
                       {link.name}
                     </Link>
@@ -115,17 +119,17 @@ export function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row justify-between items-center text-sm text-slate-600 dark:text-slate-400 gap-4"
+          className="flex flex-col md:flex-row justify-between items-center text-sm text-[#9ca3af] gap-4 pt-8 border-t border-[#2a2a3a]"
         >
           <p>© {currentYear} GROEI. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+            <Link href="/privacy" className="hover:text-[#6366f1] transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+            <Link href="/terms" className="hover:text-[#6366f1] transition-colors">
               Terms
             </Link>
-            <Link href="/cookies" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+            <Link href="/cookies" className="hover:text-[#6366f1] transition-colors">
               Cookies
             </Link>
           </div>

@@ -11,31 +11,37 @@ const features = [
     icon: FileText,
     title: "Resume Parsing",
     description: "Advanced AI-powered resume parsing extracts and analyzes key information with 99% accuracy",
+    gradient: "from-[#6366f1] to-[#8b5cf6]",
   },
   {
     icon: Sparkles,
     title: "Smart Skill Matching",
     description: "Machine learning algorithms match your skills with perfect job opportunities in real-time",
+    gradient: "from-[#8b5cf6] to-[#ec4899]",
   },
   {
     icon: MessageSquare,
     title: "Mock Interviews",
     description: "Practice with AI-powered mock interviews powered by advanced language models to ace your real interviews",
+    gradient: "from-[#ec4899] to-[#f59e0b]",
   },
   {
     icon: TrendingUp,
     title: "Heatmap Analytics",
     description: "Track your application performance with detailed analytics, insights, and comprehensive success metrics",
+    gradient: "from-[#f59e0b] to-[#10b981]",
   },
   {
     icon: MapPin,
     title: "Interview Location Map",
     description: "Find interview locations easily with integrated maps, directions, and intelligent route optimization",
+    gradient: "from-[#10b981] to-[#6366f1]",
   },
   {
     icon: Briefcase,
     title: "Freelance + Full-time",
     description: "Access both freelance gigs and full-time opportunities in one unified, comprehensive platform",
+    gradient: "from-[#6366f1] to-[#ec4899]",
   },
 ];
 
@@ -44,58 +50,61 @@ export function Features() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative bg-white dark:bg-slate-950 overflow-hidden">
+    <section ref={ref} className="relative bg-[#0a0a0f] overflow-hidden py-20 lg:py-32">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
+        {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute rounded-full blur-2xl"
             style={{
-              width: `${150 + i * 30}px`,
-              height: `${150 + i * 30}px`,
-              background: `radial-gradient(circle, rgba(4, 31, 43, ${0.05 + i * 0.01}) 0%, transparent 70%)`,
-              left: `${i * 12}%`,
+              width: `${180 + i * 35}px`,
+              height: `${180 + i * 35}px`,
+              background: `radial-gradient(circle, rgba(99, 102, 241, ${0.08 - i * 0.006}) 0%, transparent 70%)`,
+              left: `${i * 10}%`,
               top: `${20 + (i % 3) * 30}%`,
             }}
             animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 30, -20, 0],
-              y: [0, -30, 20, 0],
+              scale: [1, 1.25, 1],
+              x: [0, 40, -30, 0],
+              y: [0, -40, 30, 0],
             }}
             transition={{
-              duration: 10 + i * 2,
+              duration: 12 + i * 2,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: i * 0.3,
+              delay: i * 0.4,
             }}
           />
         ))}
       </div>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-32 relative z-10">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="mx-auto">
           <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-12 sm:mb-16 space-y-3 sm:space-y-4"
+        className="text-center mb-16 space-y-4"
       >
-        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/60 dark:bg-slate-950/60 backdrop-blur-sm border-0 mb-3 sm:mb-4">
-          <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-600 dark:text-slate-400" />
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151520]/50 backdrop-blur-sm border border-[#6366f1]/20 mb-4">
+          <Sparkles className="h-4 w-4 text-[#6366f1]" />
+          <span className="text-xs font-medium text-[#a5b4fc] uppercase tracking-wide">
             Platform Features
           </span>
         </div>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100 tracking-tight px-4">
-          Powerful Features for
+        <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight px-4">
+          <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+            Powerful Features for
+          </span>
           <br />
-          <span className="text-slate-600 dark:text-slate-400">Modern Professionals</span>
+          <span className="text-[#9ca3af]">Modern Professionals</span>
         </h2>
-        <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto px-4">
+        <p className="text-lg md:text-xl text-[#9ca3af] max-w-3xl mx-auto px-4">
           Everything you need to land your dream job or find the perfect freelancer in one place
         </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           {features.map((feature, index) => {
           const Icon = feature.icon;
           
@@ -107,62 +116,56 @@ export function Features() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
               <Card 
-                className="group relative overflow-hidden border-0 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-950 transition-all duration-500 h-full"
+                className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 h-full"
               >
                 <motion.div
-                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#041F2B] to-[#0d4a63] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                  className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
                   whileHover={{ scaleX: 1 }}
                 />
                 
                 <motion.div
-                  className="absolute top-0 right-0 w-32 h-32 bg-[#041F2B]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 rounded-full blur-3xl transition-opacity duration-500`}
                   animate={{
                     scale: [1, 1.2, 1],
                     rotate: [0, 90, 0],
                   }}
                   transition={{
-                    duration: 4,
+                    duration: 6,
                     repeat: Infinity,
-                    delay: index * 0.2,
+                    delay: index * 0.3,
                   }}
                 />
                 
                 <CardHeader className="relative pb-6">
                   <motion.div
-                    className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-6 group-hover:from-[#041F2B] group-hover:to-[#0d4a63] transition-all duration-500"
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-xl shadow-[#6366f1]/30 transition-all duration-500`}
                     whileHover={{ scale: 1.15, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 300 }}
                     animate={{
                       boxShadow: [
-                        "0 0 0px rgba(4, 31, 43, 0)",
-                        "0 0 20px rgba(4, 31, 43, 0.1)",
-                        "0 0 0px rgba(4, 31, 43, 0)",
+                        `0 0 0px rgba(99, 102, 241, 0)`,
+                        `0 0 25px rgba(99, 102, 241, 0.3)`,
+                        `0 0 0px rgba(99, 102, 241, 0)`,
                       ],
                     }}
                     transition={{
                       duration: 3,
                       repeat: Infinity,
-                      delay: index * 0.3,
+                      delay: index * 0.4,
                     }}
                   >
-                    <Icon className="h-7 w-7 text-slate-700 dark:text-slate-300 group-hover:text-white transition-colors duration-500" />
+                    <Icon className="h-8 w-8 text-white" />
                   </motion.div>
-                  <CardTitle className="text-xl mb-3 text-slate-900 dark:text-slate-100 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                  <CardTitle className="text-xl mb-3 text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
                     {feature.title}
                   </CardTitle>
-                  <CardDescription className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                  <CardDescription className="text-base leading-relaxed text-[#9ca3af]">
                     {feature.description}
                   </CardDescription>
                 </CardHeader>
                 
                 <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#041F2B]/5 dark:from-[#041F2B]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                />
-                
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#041F2B] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                   initial={{ scaleX: 0 }}
                   whileHover={{ scaleX: 1 }}
                   style={{ originX: 0 }}
