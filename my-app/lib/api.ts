@@ -1,3 +1,5 @@
+import { clearAuthCookies } from './cookies';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 class ApiClient {
@@ -16,9 +18,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...options.headers as Record<string, string>,
     };
 
     if (this.token) {
@@ -36,21 +38,21 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         let errorData: any = null;
-        
+
         try {
           errorData = JSON.parse(errorText);
         } catch {
           errorData = { error: errorText || `Request failed with status ${response.status}` };
         }
-        
+
         const errorMessage = errorData.errors && Array.isArray(errorData.errors)
           ? errorData.errors.map((e: any) => e.msg || e.message || e.param).join(', ')
           : errorData.error || errorData.message || `Request failed with status ${response.status}`;
-        
+
         const error = new Error(errorMessage);
         (error as any).status = response.status;
         (error as any).data = errorData;
@@ -61,10 +63,10 @@ class ApiClient {
 
       const contentType = response.headers.get('content-type') || '';
       let responseData: any;
-      
+
       try {
         const responseText = await response.text();
-        
+
         if (!responseText || responseText.trim() === '') {
           responseData = {};
         } else if (contentType.includes('application/json')) {
@@ -80,15 +82,15 @@ class ApiClient {
         console.error('Error parsing response:', parseError, 'Content-Type:', contentType);
         throw new Error(`Failed to parse server response: ${parseError.message}`);
       }
-      
+
       return responseData as T;
     } catch (error: any) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
         throw new Error('Request timeout. Please check if the backend server is running on http://localhost:8080');
       }
-      
+
       if (error.isApiError) {
         throw error;
       }
@@ -155,6 +157,14 @@ export const authAPI = {
     return response;
   },
 
+  sendOtp: async (email: string, name?: string) => {
+    return api.post<{ message: string }>("/auth/send-otp", { email, name });
+  },
+
+  verifyOtp: async (email: string, otp: string) => {
+    return api.post<{ message: string }>("/auth/verify-otp", { email, otp });
+  },
+
   login: async (email: string, password: string) => {
     const response = await api.post<{
       message: string;
@@ -184,9 +194,8 @@ export const authAPI = {
       localStorage.removeItem('adminCompany');
       localStorage.removeItem('adminName');
       localStorage.removeItem('adminEmail');
-      
+
       // Clear cookies
-      const { clearAuthCookies } = require('./cookies');
       clearAuthCookies();
     }
   },

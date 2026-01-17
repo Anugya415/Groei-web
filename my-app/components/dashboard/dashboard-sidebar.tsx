@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -104,11 +105,10 @@ export function DashboardSidebar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        isActive
-                          ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
-                          : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                        ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
+                        : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                        }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{item.label}</span>
@@ -120,10 +120,8 @@ export function DashboardSidebar() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    if (typeof window !== "undefined") {
-                      localStorage.removeItem("isLoggedIn");
-                      window.location.href = "/";
-                    }
+                    authAPI.logout();
+                    window.location.href = "/login";
                   }}
                   className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
                 >
@@ -170,18 +168,17 @@ export function DashboardSidebar() {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || 
+            const isActive = pathname === item.href ||
               (item.href === "/dashboard" && pathname === "/dashboard") ||
               (item.href === "/jobs" && pathname.startsWith("/jobs"));
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
-                    : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive
+                  ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
+                  : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-[#6366f1]" : ""}`} />
                 <span className="font-medium">{item.label}</span>
@@ -202,10 +199,8 @@ export function DashboardSidebar() {
           <Button
             variant="ghost"
             onClick={() => {
-              if (typeof window !== "undefined") {
-                localStorage.removeItem("isLoggedIn");
-                window.location.href = "/";
-              }
+              authAPI.logout();
+              window.location.href = "/login";
             }}
             className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
           >

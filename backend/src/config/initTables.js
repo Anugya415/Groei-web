@@ -18,7 +18,7 @@ const createTables = async () => {
       ...dbConfig,
       database: dbName,
     });
-    
+
     const schemaSQL = `
 CREATE TABLE IF NOT EXISTS companies (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,6 +176,17 @@ CREATE TABLE IF NOT EXISTS interviews (
   INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS otp_verifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  otp VARCHAR(6) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_expires_at (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS notifications (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -220,9 +231,9 @@ CREATE TABLE IF NOT EXISTS analytics (
   INDEX idx_date (date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `;
-    
+
     const statements = schemaSQL.split(';').filter(stmt => stmt.trim().length > 0);
-    
+
     for (const statement of statements) {
       if (statement.trim()) {
         try {
@@ -234,7 +245,7 @@ CREATE TABLE IF NOT EXISTS analytics (
         }
       }
     }
-    
+
     const columnsToAdd = [
       { name: 'bio', type: 'TEXT' },
       { name: 'experience', type: 'VARCHAR(255)' },
@@ -249,7 +260,7 @@ CREATE TABLE IF NOT EXISTS analytics (
       { name: 'password_reset_token', type: 'VARCHAR(255)' },
       { name: 'password_reset_expires', type: 'DATETIME' },
     ];
-    
+
     for (const column of columnsToAdd) {
       try {
         const [columns] = await connection.query(
@@ -257,7 +268,7 @@ CREATE TABLE IF NOT EXISTS analytics (
            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = ?`,
           [dbName, column.name]
         );
-        
+
         if (columns.length === 0) {
           await connection.query(
             `ALTER TABLE users ADD COLUMN ${column.name} ${column.type}`
@@ -285,7 +296,7 @@ CREATE TABLE IF NOT EXISTS analytics (
            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND INDEX_NAME = ?`,
           [dbName, index.name]
         );
-        
+
         if (indexes.length === 0) {
           // Check if column exists before adding index
           const [columns] = await connection.query(
@@ -293,7 +304,7 @@ CREATE TABLE IF NOT EXISTS analytics (
              WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = ?`,
             [dbName, index.column]
           );
-          
+
           if (columns.length > 0) {
             await connection.query(
               `ALTER TABLE users ADD INDEX ${index.name} (${index.column})`
@@ -307,9 +318,9 @@ CREATE TABLE IF NOT EXISTS analytics (
         }
       }
     }
-    
+
     console.log('All tables checked/created successfully');
-    
+
     await connection.end();
     return true;
   } catch (error) {

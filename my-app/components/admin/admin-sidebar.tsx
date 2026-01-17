@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -45,7 +46,7 @@ export function AdminSidebar() {
       const company = localStorage.getItem("adminCompany") || "";
       const email = localStorage.getItem("adminEmail") || "";
       const name = localStorage.getItem("adminName") || "Recruiter";
-      
+
       const initials = name
         .split(" ")
         .map((n) => n[0])
@@ -119,7 +120,7 @@ export function AdminSidebar() {
               <nav className="space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href || 
+                  const isActive = pathname === item.href ||
                     (item.href === "/admin" && pathname === "/admin") ||
                     (item.href === "/admin/companies" && pathname === "/admin/companies") ||
                     (item.href === "/admin/analytics" && pathname === "/admin/analytics") ||
@@ -129,11 +130,10 @@ export function AdminSidebar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        isActive
-                          ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
-                          : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                        ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
+                        : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                        }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{item.label}</span>
@@ -145,10 +145,8 @@ export function AdminSidebar() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    if (typeof window !== "undefined") {
-                      localStorage.removeItem("isAdminLoggedIn");
-                      window.location.href = "/";
-                    }
+                    authAPI.logout();
+                    window.location.href = "/login";
                   }}
                   className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
                 >
@@ -198,7 +196,7 @@ export function AdminSidebar() {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || 
+            const isActive = pathname === item.href ||
               (item.href === "/admin" && pathname === "/admin") ||
               (item.href === "/admin/companies" && pathname === "/admin/companies") ||
               (item.href === "/admin/analytics" && pathname === "/admin/analytics") ||
@@ -207,11 +205,10 @@ export function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
-                    : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive
+                  ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
+                  : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-[#6366f1]" : ""}`} />
                 <span className="font-medium">{item.label}</span>
@@ -232,10 +229,8 @@ export function AdminSidebar() {
           <Button
             variant="ghost"
             onClick={() => {
-              if (typeof window !== "undefined") {
-                localStorage.removeItem("isAdminLoggedIn");
-                window.location.href = "/";
-              }
+              authAPI.logout();
+              window.location.href = "/login";
             }}
             className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
           >

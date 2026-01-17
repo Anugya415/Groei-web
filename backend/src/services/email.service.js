@@ -151,13 +151,63 @@ const emailTemplates = {
       © ${new Date().getFullYear()} GROEI. All rights reserved.
     `,
   }),
+
+  otp: (name, otp) => ({
+    subject: 'Your Verification Code - GROEI',
+    html: `
+    < !DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+        <style>
+          body {font - family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container {max - width: 600px; margin: 0 auto; padding: 20px; }
+          .header {background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header h1 {color: white; margin: 0; }
+          .content {background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .otp-code {font - size: 32px; font-weight: bold; letter-spacing: 5px; color: #6366f1; text-align: center; margin: 20px 0; background: #e0e7ff; padding: 15px; border-radius: 8px; }
+          .footer {text - align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+        </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Verification Code</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${name}!</h2>
+          <p>Use the following code to complete your registration with GROEI. This code is valid for 10 minutes.</p>
+          <div class="otp-code">${otp}</div>
+          <p>If you didn't request this code, please ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} GROEI. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+  </html>
+`,
+    text: `
+      Your Verification Code - GROEI
+      
+      Hello ${name} !
+
+  Use the following code to complete your registration with GROEI:
+      
+      ${otp}
+      
+      This code is valid for 10 minutes.
+      
+      © ${new Date().getFullYear()} GROEI.All rights reserved.
+    `,
+  }),
 };
 
 // Send email
 export const sendEmail = async (to, templateName, templateData) => {
   try {
     const transporter = createTransporter();
-    
+
     // Check if email is configured
     if (!process.env.SMTP_USER && !process.env.EMAIL_USER) {
       console.warn('⚠️  Email not configured. Skipping email send.');
@@ -175,7 +225,7 @@ export const sendEmail = async (to, templateName, templateData) => {
     );
 
     const mailOptions = {
-      from: `"GROEI" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+      from: `"GROEI" < ${process.env.SMTP_USER || process.env.EMAIL_USER}> `,
       to,
       subject,
       html,
@@ -196,7 +246,7 @@ export const sendEmail = async (to, templateName, templateData) => {
 export const sendVerificationEmail = async (email, name, token) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
-  
+
   return await sendEmail(email, 'verification', {
     name,
     url: verificationUrl,
@@ -207,10 +257,18 @@ export const sendVerificationEmail = async (email, name, token) => {
 export const sendPasswordResetEmail = async (email, name, token) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
-  
+
   return await sendEmail(email, 'passwordReset', {
     name,
     url: resetUrl,
   });
 };
 
+// Send OTP email
+export const sendOTP = async (email, name, otp) => {
+  return await sendEmail(email, 'otp', {
+    name,
+    otp,
+    url: otp, // keep url for compatibility if needed
+  });
+};

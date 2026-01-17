@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -50,7 +51,7 @@ export function SuperAdminSidebar() {
     if (typeof window !== "undefined") {
       const email = localStorage.getItem("superAdminEmail") || localStorage.getItem("adminEmail") || "";
       const name = localStorage.getItem("superAdminName") || localStorage.getItem("adminName") || "Super Admin";
-      
+
       const initials = name
         .split(" ")
         .map((n) => n[0])
@@ -126,11 +127,10 @@ export function SuperAdminSidebar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        isActive
-                          ? "bg-gradient-to-r from-[#ec4899]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#ec4899]/30"
-                          : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                        ? "bg-gradient-to-r from-[#ec4899]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#ec4899]/30"
+                        : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                        }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{item.label}</span>
@@ -142,11 +142,8 @@ export function SuperAdminSidebar() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    if (typeof window !== "undefined") {
-                      localStorage.removeItem("isSuperAdminLoggedIn");
-                      localStorage.removeItem("isAdminLoggedIn");
-                      window.location.href = "/";
-                    }
+                    authAPI.logout();
+                    window.location.href = "/login";
                   }}
                   className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
                 >
@@ -198,11 +195,10 @@ export function SuperAdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#ec4899]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#ec4899]/30"
-                    : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive
+                  ? "bg-gradient-to-r from-[#ec4899]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#ec4899]/30"
+                  : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-[#ec4899]" : ""}`} />
                 <span className="font-medium">{item.label}</span>
@@ -223,11 +219,8 @@ export function SuperAdminSidebar() {
           <Button
             variant="ghost"
             onClick={() => {
-              if (typeof window !== "undefined") {
-                localStorage.removeItem("isSuperAdminLoggedIn");
-                localStorage.removeItem("isAdminLoggedIn");
-                window.location.href = "/";
-              }
+              authAPI.logout();
+              window.location.href = "/login";
             }}
             className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
           >

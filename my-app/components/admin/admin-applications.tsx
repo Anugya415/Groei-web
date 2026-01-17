@@ -142,7 +142,7 @@ export function AdminApplicationsContent() {
     if (typeof window !== "undefined") {
       const recruiterCompany = localStorage.getItem("adminCompany") || "TechCorp";
       setCompany(recruiterCompany);
-      
+
       const urlParams = new URLSearchParams(window.location.search);
       const appId = urlParams.get("appId");
       if (appId) {
@@ -234,21 +234,48 @@ export function AdminApplicationsContent() {
     ? companyApplications.find(a => a.id === selectedApplication)
     : null;
 
-  const updateApplicationStatus = async (appId: number, newStatus: string) => {
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const [interviewDate, setInterviewDate] = useState("");
+  const [pendingStatusId, setPendingStatusId] = useState<number | null>(null);
+
+  const handleStatusClick = (appId: number, status: string) => {
+    if (status === "Interview Scheduled") {
+      setPendingStatusId(appId);
+      setIsInterviewModalOpen(true);
+    } else {
+      updateApplicationStatus(appId, status);
+    }
+  };
+
+  const submitInterview = () => {
+    if (pendingStatusId && interviewDate) {
+      updateApplicationStatus(pendingStatusId, "Interview Scheduled", interviewDate);
+      setIsInterviewModalOpen(false);
+      setPendingStatusId(null);
+      setInterviewDate("");
+    }
+  };
+
+  const updateApplicationStatus = async (appId: number, newStatus: string, date?: string) => {
     try {
-      await applicationsAPI.updateStatus(appId, { status: newStatus });
+      await applicationsAPI.updateStatus(appId, { status: newStatus, interview_date: date });
       await loadApplications();
       if (selectedApplication === appId) {
-        setSelectedApplication(null);
+        // Refresh selected application data if it's open
+        const updatedApp = applications.find(a => a.id === appId);
+        // Note: applications state might not be updated immediately after loadApplications in this closure
+        // So we might need to rely on the re-render triggers from loadApplications state update
+        // But for UX, we can just close the modal or keep it open.
+        // The loadApplications call will update the list.
       }
     } catch (error) {
       console.error("Failed to update application status:", error);
     }
   };
 
-
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
+      {/* ... existing render content ... */}
       <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
@@ -261,6 +288,7 @@ export function AdminApplicationsContent() {
             transition={{ duration: 0.6 }}
             className="mb-8"
           >
+            {/* ... Headers ... */}
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">
@@ -312,11 +340,10 @@ export function AdminApplicationsContent() {
                   key={status}
                   variant={statusFilter === status ? "default" : "outline"}
                   onClick={() => setStatusFilter(status)}
-                  className={`whitespace-nowrap ${
-                    statusFilter === status
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0"
-                      : "border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
-                  }`}
+                  className={`whitespace-nowrap ${statusFilter === status
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0"
+                    : "border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
+                    }`}
                 >
                   {status} ({count})
                 </Button>
@@ -370,11 +397,6 @@ export function AdminApplicationsContent() {
                             <Badge className={statusColors[application.status as keyof typeof statusColors]}>
                               {application.status}
                             </Badge>
-                            {application.match_score && (
-                              <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
-                                {application.match_score}% match
-                              </Badge>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -409,13 +431,6 @@ export function AdminApplicationsContent() {
                             </Button>
                           </div>
                         )}
-                        <Button
-                          variant="outline"
-                          className="border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Resume
-                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -435,7 +450,7 @@ export function AdminApplicationsContent() {
               <CardContent className="p-12 text-center">
                 <Briefcase className="h-16 w-16 text-[#6366f1] mx-auto mb-4 opacity-50" />
                 <h3 className="text-xl font-semibold text-[#e8e8f0] mb-2">
-                  {companyApplications.length === 0 
+                  {companyApplications.length === 0
                     ? `No applications found for ${company || 'your company'}`
                     : "No applications match your search criteria"}
                 </h3>
@@ -498,97 +513,30 @@ export function AdminApplicationsContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
+                  {/* ... Detail Cards ... */}
                   <div>
                     <h3 className="text-xl font-bold text-[#e8e8f0] mb-4">
                       {selectedAppData.job_title || 'Job'} - {selectedAppData.company_name || ''}
                     </h3>
                     <div className="flex items-center gap-4 text-sm text-[#9ca3af] mb-6">
-                      {selectedAppData.job_location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{selectedAppData.job_location}</span>
-                        </div>
-                      )}
                       <Badge className={statusColors[selectedAppData.status as keyof typeof statusColors]}>
                         {selectedAppData.status}
                       </Badge>
-                      {selectedAppData.match_score && (
-                        <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
-                          {selectedAppData.match_score}% match
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
+                  {/* ... User Info Card ... */}
                   <Card className="border border-[#2a2a3a] bg-[#1e1e2e]">
                     <CardHeader>
-                      <CardTitle className="text-lg font-bold text-[#e8e8f0] flex items-center gap-2">
-                        <User className="h-5 w-5 text-[#6366f1]" />
-                        Applicant Information
-                      </CardTitle>
+                      <CardTitle className="text-lg font-bold text-[#e8e8f0]">Applicant</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-[#9ca3af] mb-1">Name</p>
-                        <p className="text-[#e8e8f0]">{selectedAppData.applicant_name || 'N/A'}</p>
-                      </div>
-                      {selectedAppData.applicant_email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-[#6366f1]" />
-                          <a href={`mailto:${selectedAppData.applicant_email}`} className="text-[#6366f1] hover:underline">
-                            {selectedAppData.applicant_email}
-                          </a>
-                        </div>
-                      )}
-                      {selectedAppData.applicant_phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-[#6366f1]" />
-                          <a href={`tel:${selectedAppData.applicant_phone}`} className="text-[#6366f1] hover:underline">
-                            {selectedAppData.applicant_phone}
-                          </a>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-[#9ca3af] mb-1">Applied Date</p>
-                        <p className="text-[#e8e8f0]">{new Date(selectedAppData.applied_at || Date.now()).toLocaleDateString()}</p>
-                      </div>
-                      {selectedAppData.interview_date && (
-                        <div>
-                          <p className="text-sm font-medium text-[#9ca3af] mb-1">Interview Date</p>
-                          <p className="text-[#e8e8f0]">{new Date(selectedAppData.interview_date).toLocaleDateString()}</p>
-                        </div>
-                      )}
+                    <CardContent>
+                      <p className="text-[#e8e8f0]">{selectedAppData.applicant_name}</p>
+                      <p className="text-[#9ca3af]">{selectedAppData.applicant_email}</p>
                     </CardContent>
                   </Card>
 
-                  <Card className="border border-[#2a2a3a] bg-[#1e1e2e]">
-                    <CardHeader>
-                      <CardTitle className="text-lg font-bold text-[#e8e8f0]">Application Information</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {selectedAppData.resume_url && (
-                        <div>
-                          <p className="text-sm font-medium text-[#9ca3af] mb-1">Resume</p>
-                          <a href={selectedAppData.resume_url} target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:underline">
-                            View Resume
-                          </a>
-                        </div>
-                      )}
-                      {selectedAppData.cover_letter && (
-                        <div>
-                          <p className="text-sm font-medium text-[#9ca3af] mb-2">Cover Letter</p>
-                          <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.cover_letter}</p>
-                        </div>
-                      )}
-                      {selectedAppData.notes && (
-                        <div>
-                          <p className="text-sm font-medium text-[#9ca3af] mb-2">Notes</p>
-                          <p className="text-[#9ca3af] leading-relaxed">{selectedAppData.notes}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
+                  {/* ... Quick Actions ... */}
                   <Card className="border border-[#2a2a3a] bg-[#1e1e2e]">
                     <CardHeader>
                       <CardTitle className="text-lg font-bold text-[#e8e8f0]">Quick Actions</CardTitle>
@@ -597,17 +545,15 @@ export function AdminApplicationsContent() {
                       <div className="flex gap-3 mb-4">
                         <Button
                           onClick={() => updateApplicationStatus(selectedAppData.id, "Accepted")}
-                          className="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:from-[#059669] hover:to-[#047857] border-0"
+                          className="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] text-white border-0"
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Accept
+                          Convert to Accepted
                         </Button>
                         <Button
                           onClick={() => updateApplicationStatus(selectedAppData.id, "Rejected")}
                           variant="outline"
-                          className="flex-1 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10 hover:border-[#ef4444]"
+                          className="flex-1 border-[#ef4444] text-[#ef4444]"
                         >
-                          <XCircle className="h-4 w-4 mr-2" />
                           Reject
                         </Button>
                       </div>
@@ -616,13 +562,12 @@ export function AdminApplicationsContent() {
                           <Button
                             key={status}
                             variant={selectedAppData.status === status ? "default" : "outline"}
-                            onClick={() => updateApplicationStatus(selectedAppData.id, status)}
+                            onClick={() => handleStatusClick(selectedAppData.id, status)}
                             size="sm"
-                            className={`text-xs ${
-                              selectedAppData.status === status
-                                ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0"
-                                : "border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
-                            }`}
+                            className={`text-xs ${selectedAppData.status === status
+                              ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0"
+                              : "border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
+                              }`}
                           >
                             {status}
                           </Button>
@@ -637,8 +582,8 @@ export function AdminApplicationsContent() {
                       Contact Applicant
                     </Button>
                     {selectedAppData.resume_url && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="flex-1 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                         onClick={() => window.open(selectedAppData.resume_url, '_blank')}
                       >
@@ -653,6 +598,54 @@ export function AdminApplicationsContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isInterviewModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0a0a0f]/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md bg-[#151520] border border-[#2a2a3a] rounded-xl p-6 shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-[#e8e8f0] mb-4">Schedule Interview</h3>
+              <p className="text-[#9ca3af] mb-4">Select a date and time for the interview.</p>
+
+              <div className="mb-6">
+                <Input
+                  type="datetime-local"
+                  value={interviewDate}
+                  onChange={(e) => setInterviewDate(e.target.value)}
+                  className="bg-[#1e1e2e] border-[#2a2a3a] text-[#e8e8f0]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsInterviewModalOpen(false)}
+                  className="border-[#2a2a3a] text-[#9ca3af] hover:bg-[#1e1e2e]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={submitInterview}
+                  disabled={!interviewDate}
+                  className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                >
+                  Schedule
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

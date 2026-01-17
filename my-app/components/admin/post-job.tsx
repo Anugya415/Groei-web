@@ -25,7 +25,7 @@ export function PostJobContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,7 +37,7 @@ export function PostJobContent() {
     skills_required: "",
   });
 
-  const jobTypes = ["Full-time", "Part-time", "Contract", "Internship", "Remote"];
+  const jobTypes = ["Full-time", "Part-time", "Contract", "Internship", "Remote", "Project"];
   const experienceLevels = ["Entry", "Mid", "Senior", "Executive"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -107,7 +107,7 @@ export function PostJobContent() {
       }
 
       const response = await jobsAPI.create(jobData);
-      
+
       if (response.job) {
         setSuccess(true);
         setFormData({
@@ -120,14 +120,14 @@ export function PostJobContent() {
           experience_level: "",
           skills_required: "",
         });
-        
+
         setTimeout(() => {
           router.push("/admin");
         }, 2000);
       }
     } catch (error: any) {
       let errorMessage = "Failed to post job. Please try again.";
-      
+
       if (error.isApiError) {
         if (error.data && error.data.errors && Array.isArray(error.data.errors)) {
           errorMessage = error.data.errors.map((e: any) => e.msg || e.message || e.param).join(", ");
@@ -139,7 +139,7 @@ export function PostJobContent() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
