@@ -30,8 +30,8 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
         scrolled 
-          ? "bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-[#6366f1]/20 shadow-lg shadow-[#6366f1]/5" 
-          : "bg-[#0a0a0f]/80 backdrop-blur-lg"
+          ? "bg-white/95 backdrop-blur-xl border-b border-[#041f2b]/10 shadow-lg shadow-[#041f2b]/5" 
+          : "bg-white/80 backdrop-blur-lg"
       }`}
     >
       <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,16 +43,16 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 400 }}
             >
               <motion.div
-                className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#ec4899] flex items-center justify-center shadow-lg shadow-[#6366f1]/30"
+                className="relative w-11 h-11 rounded-xl bg-[#041f2b] flex items-center justify-center shadow-lg shadow-[#041f2b]/20"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
                 <Sparkles className="h-5 w-5 text-white" />
                 <motion.div
-                  className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] opacity-0 group-hover:opacity-100 blur-md transition-opacity"
+                  className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 blur-md transition-opacity"
                 />
               </motion.div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent tracking-tight">
+              <span className="text-2xl font-bold text-[#041f2b] tracking-tight">
                 GROEI
               </span>
             </motion.div>
@@ -68,14 +68,14 @@ export function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className="relative px-4 py-2.5 text-sm font-medium text-[#9ca3af] hover:text-[#e8e8f0] transition-colors duration-200 rounded-lg group"
+                  className="relative px-4 py-2.5 text-sm font-medium text-[#041f2b]/70 hover:text-[#041f2b] transition-colors duration-200 rounded-lg group"
                 >
                   <span className="relative z-10">{link.name}</span>
                   <motion.span
-                    className="absolute inset-0 bg-[#1e1e2e] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    className="absolute inset-0 bg-[#041f2b]/05 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   />
                   <motion.span
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] group-hover:w-3/4 transition-all duration-300 rounded-full"
+                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#041f2b] group-hover:w-3/4 transition-all duration-300 rounded-full"
                   />
                 </Link>
               </motion.div>
@@ -91,7 +91,7 @@ export function Navbar() {
                 variant="ghost" 
                 size="sm" 
                 asChild 
-                className="text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e] px-4 border-0"
+                className="text-[#041f2b]/70 hover:text-[#041f2b] hover:bg-[#041f2b]/05 px-4 border-0"
               >
                 <Link href="/login">Login</Link>
               </Button>
@@ -103,7 +103,7 @@ export function Navbar() {
               <Button 
                 size="sm" 
                 asChild 
-                className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30 transition-all duration-300 px-5"
+                className="bg-[#041f2b] text-white hover:bg-[#041f2b]/90 border-0 shadow-lg shadow-[#041f2b]/20 transition-all duration-300 px-5"
               >
                 <Link href="/signup" className="flex items-center gap-1.5">
                   Sign Up
@@ -119,7 +119,7 @@ export function Navbar() {
           </div>
 
           <motion.button
-            className="lg:hidden p-2 rounded-lg text-[#e8e8f0] hover:bg-[#1e1e2e] transition-colors"
+            className="lg:hidden p-2 rounded-lg text-[#041f2b] hover:bg-[#041f2b]/08 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             whileTap={{ scale: 0.95 }}
@@ -141,7 +141,7 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden bg-[#0a0a0f]/98 backdrop-blur-xl overflow-hidden border-t border-[#6366f1]/20"
+            className="lg:hidden bg-white/98 backdrop-blur-xl overflow-hidden border-t border-[#041f2b]/10"
           >
             <div className="w-[80%] mx-auto px-4 py-4 space-y-1">
               {navLinks.map((link, index) => (
@@ -153,25 +153,25 @@ export function Navbar() {
                 >
                   <Link
                     href={link.href}
-                    className="block text-sm font-medium text-[#9ca3af] hover:text-[#e8e8f0] py-2.5 px-3 rounded-lg hover:bg-[#1e1e2e] transition-all duration-200"
+                    className="block text-sm font-medium text-[#041f2b]/70 hover:text-[#041f2b] py-2.5 px-3 rounded-lg hover:bg-[#041f2b]/08 transition-all duration-200"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.name}
                   </Link>
                 </motion.div>
               ))}
-              <div className="flex flex-col gap-2 pt-3 border-t border-[#6366f1]/20 mt-2">
+              <div className="flex flex-col gap-2 pt-3 border-t border-[#041f2b]/10 mt-2">
                 <motion.div
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button variant="ghost" size="sm" asChild className="w-full justify-start text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]">
+                  <Button variant="ghost" size="sm" asChild className="w-full justify-start text-[#041f2b]/70 hover:text-[#041f2b] hover:bg-[#041f2b]/08">
                     <Link href="/login">Login</Link>
                   </Button>
                 </motion.div>
                 <motion.div
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button size="sm" asChild className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg">
+                  <Button size="sm" asChild className="w-full bg-[#041f2b] text-white hover:bg-[#041f2b]/90 border-0 shadow-lg shadow-[#041f2b]/15">
                     <Link href="/signup">Sign Up</Link>
                   </Button>
                 </motion.div>

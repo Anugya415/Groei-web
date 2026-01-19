@@ -186,7 +186,7 @@ export const authAPI = {
   logout: () => {
     api.setToken(null);
     if (typeof window !== 'undefined') {
-      // Clear localStorage
+      // Clear all localStorage items
       localStorage.removeItem('authToken');
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('isAdminLoggedIn');
@@ -194,6 +194,14 @@ export const authAPI = {
       localStorage.removeItem('adminCompany');
       localStorage.removeItem('adminName');
       localStorage.removeItem('adminEmail');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('savedJobs');
+      localStorage.removeItem('appliedJobs');
+      localStorage.removeItem('userApplications');
+      localStorage.removeItem('notificationSettings');
+      localStorage.removeItem('privacySettings');
+      localStorage.removeItem('userAccountData');
 
       // Clear cookies
       clearAuthCookies();

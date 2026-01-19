@@ -172,7 +172,10 @@ export function DashboardSidebar() {
                   variant="ghost"
                   onClick={() => {
                     authAPI.logout();
-                    window.location.href = "/login";
+                    // Use setTimeout to ensure state is cleared before redirect
+                    setTimeout(() => {
+                      window.location.href = "/login";
+                    }, 100);
                   }}
                   className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
                 >
@@ -250,9 +253,10 @@ export function DashboardSidebar() {
             variant="ghost"
             onClick={() => {
               authAPI.logout();
-              localStorage.removeItem("userName");
-              localStorage.removeItem("userEmail");
-              window.location.href = "/login";
+              // Use setTimeout to ensure state is cleared before redirect
+              setTimeout(() => {
+                window.location.href = "/login";
+              }, 100);
             }}
             className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
           >

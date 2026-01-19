@@ -143,7 +143,9 @@ export function SuperAdminSidebar() {
                   variant="ghost"
                   onClick={() => {
                     authAPI.logout();
-                    window.location.href = "/login";
+                    setTimeout(() => {
+                      window.location.href = "/login";
+                    }, 100);
                   }}
                   className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
                 >
@@ -220,7 +222,9 @@ export function SuperAdminSidebar() {
             variant="ghost"
             onClick={() => {
               authAPI.logout();
-              window.location.href = "/login";
+              setTimeout(() => {
+                window.location.href = "/login";
+              }, 100);
             }}
             className="w-full justify-start text-[#9ca3af] hover:text-[#ef4444] hover:bg-[#ef4444]/10"
           >

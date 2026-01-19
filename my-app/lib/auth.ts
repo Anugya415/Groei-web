@@ -51,13 +51,28 @@ export function getAuthToken(): string | null {
 export function clearAuth(): void {
   if (typeof window === 'undefined') return;
   
+  // Clear auth tokens and login state
   localStorage.removeItem('authToken');
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('userRole');
   localStorage.removeItem('isAdminLoggedIn');
+  
+  // Clear admin data
   localStorage.removeItem('adminCompany');
   localStorage.removeItem('adminName');
   localStorage.removeItem('adminEmail');
+  
+  // Clear user data
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  
+  // Clear user preferences and saved data
+  localStorage.removeItem('savedJobs');
+  localStorage.removeItem('appliedJobs');
+  localStorage.removeItem('userApplications');
+  localStorage.removeItem('notificationSettings');
+  localStorage.removeItem('privacySettings');
+  localStorage.removeItem('userAccountData');
 }
 
 /**
