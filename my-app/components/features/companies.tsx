@@ -26,7 +26,7 @@ const industries = ["All Industries", "Technology", "Finance", "Healthcare", "Ed
 const sizes = ["All Sizes", "Startup (1-50)", "Small (51-200)", "Medium (201-1000)", "Large (1000+)"];
 const locations = ["All Locations", "Remote", "New York", "San Francisco", "London", "Toronto"];
 
-const companies = [
+const MOCK_COMPANIES = [
   {
     id: 1,
     name: "TechCorp",

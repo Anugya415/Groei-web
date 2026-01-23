@@ -36,7 +36,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authAPI, applicationsAPI } from "@/lib/api";
+import { authAPI, applicationsAPI, jobsAPI } from "@/lib/api";
 
 const applications = [
   {
@@ -180,6 +180,8 @@ export function DashboardContent() {
   const [savedJobIds, setSavedJobIds] = useState<number[]>([]);
   const [user, setUser] = useState<any>(null);
   const [userApplications, setUserApplications] = useState<any[]>([]);
+  const [userSavedJobs, setUserSavedJobs] = useState<any[]>([]);
+  const [userRecommendations, setUserRecommendations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -225,13 +227,24 @@ export function DashboardContent() {
           }
 
           try {
-            const applicationsResponse = await applicationsAPI.getMyApplications();
-            if (applicationsResponse.applications) {
-              setUserApplications(applicationsResponse.applications);
+            const [applicationsRes, savedRes, recommendationsRes] = await Promise.all([
+              applicationsAPI.getMyApplications(),
+              jobsAPI.getSaved(),
+              jobsAPI.getSuggestions()
+            ]);
+
+            if (applicationsRes.applications) {
+              setUserApplications(applicationsRes.applications);
+            }
+            if (savedRes.jobs) {
+              setUserSavedJobs(savedRes.jobs);
+              setSavedJobIds(savedRes.jobs.map((j: any) => j.id));
+            }
+            if (recommendationsRes.jobs) {
+              setUserRecommendations(recommendationsRes.jobs);
             }
           } catch (appError) {
-            console.error("Failed to load applications:", appError);
-            // Don't fail the whole dashboard if just applications fail
+            console.error("Failed to load dashboard components:", appError);
           }
         })(),
         timeoutPromise
@@ -297,7 +310,7 @@ export function DashboardContent() {
 
   const stats = [
     { label: "Applications", value: userApplications.length, icon: Briefcase, gradient: "from-[#6366f1] to-[#8b5cf6]" },
-    { label: "Interviews", value: userApplications.filter((app: any) => app.status === "Interview Scheduled").length, icon: MessageSquare, gradient: "from-[#8b5cf6] to-[#ec4899]" },
+    { label: "Interviews", value: userApplications.filter((app: any) => app.status === "Interview Scheduled" || app.status === "interviewing").length, icon: MessageSquare, gradient: "from-[#8b5cf6] to-[#ec4899]" },
     { label: "Avg Match", value: userApplications.length > 0 ? `${Math.round(userApplications.reduce((sum: number, app: any) => sum + (app.match_score || 0), 0) / userApplications.length)}%` : "0%", icon: TrendingUp, gradient: "from-[#ec4899] to-[#f59e0b]" },
     { label: "Profile Views", value: 0, icon: Eye, gradient: "from-[#10b981] to-[#6366f1]" },
   ];
@@ -515,70 +528,84 @@ export function DashboardContent() {
             {activeTab === "applications" && (
               <>
                 <div className="space-y-4">
-                  {applications.map((application, index) => (
-                    <motion.div
-                      key={application.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10">
-                        <motion.div
-                          className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
-                          whileHover={{ scaleX: 1 }}
-                        />
+                  {userApplications.length > 0 ? (
+                    userApplications.map((application, index) => (
+                      <motion.div
+                        key={application.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                      >
+                        <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10">
+                          <motion.div
+                            className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                            whileHover={{ scaleX: 1 }}
+                          />
 
-                        <CardHeader>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                            <div className="flex-1">
-                              <CardTitle className="text-xl sm:text-2xl mb-2 text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
-                                {application.jobTitle}
-                              </CardTitle>
-                              <div className="flex flex-wrap items-center gap-3 text-sm text-[#9ca3af] mb-4">
-                                <div className="flex items-center gap-1.5">
-                                  <Briefcase className="h-4 w-4" />
-                                  <span className="font-medium">{application.company}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <MapPin className="h-4 w-4" />
-                                  <span>{application.location}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-[#6366f1] font-semibold">₹</span>
-                                  <span>{application.salary}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <Clock className="h-4 w-4" />
-                                  <span>Applied {application.date}</span>
-                                </div>
-                                {application.interviewDate && (
+                          <CardHeader>
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-xl sm:text-2xl mb-2 text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
+                                  {application.job_title || application.jobTitle}
+                                </CardTitle>
+                                <div className="flex flex-wrap items-center gap-3 text-sm text-[#9ca3af] mb-4">
                                   <div className="flex items-center gap-1.5">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>Interview: {application.interviewDate}</span>
+                                    <Briefcase className="h-4 w-4" />
+                                    <span className="font-medium">{application.company_name || application.company}</span>
                                   </div>
-                                )}
-                              </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <MapPin className="h-4 w-4" />
+                                    <span>{application.location}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[#6366f1] font-semibold">₹</span>
+                                    <span>{application.salary || 'Not specified'}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="h-4 w-4" />
+                                    <span>Applied {application.created_at ? new Date(application.created_at).toLocaleDateString() : application.date}</span>
+                                  </div>
+                                  {application.interview_date && (
+                                    <div className="flex items-center gap-1.5">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>Interview: {new Date(application.interview_date).toLocaleString()}</span>
+                                    </div>
+                                  )}
+                                </div>
 
-                              <div className="flex flex-wrap items-center gap-3">
-                                <Badge className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0 shadow-lg shadow-[#6366f1]/30">
-                                  {application.status}
-                                </Badge>
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <Badge className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0 shadow-lg shadow-[#6366f1]/30">
+                                    {application.status}
+                                  </Badge>
+                                  {application.match_score && (
+                                    <Badge variant="outline" className="border-[#6366f1] text-[#6366f1]">
+                                      {application.match_score}% Match
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
+                              <Button
+                                onClick={() => {
+                                  router.push(`/dashboard/applications?appId=${application.id}`);
+                                }}
+                                variant="outline"
+                                className="border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                              >
+                                View Details
+                              </Button>
                             </div>
-                            <Button
-                              onClick={() => {
-                                router.push(`/dashboard/applications?appId=${application.id}`);
-                              }}
-                              variant="outline"
-                              className="border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
-                            >
-                              View Details
-                            </Button>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    </motion.div>
-                  ))}
+                          </CardHeader>
+                        </Card>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm p-8 text-center">
+                      <p className="text-[#9ca3af]">No applications found. Start your journey by applying to jobs!</p>
+                      <Button asChild className="mt-4 bg-[#6366f1]">
+                        <Link href="/jobs">Browse Jobs</Link>
+                      </Button>
+                    </Card>
+                  )}
                 </div>
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
                   <Card className="border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/10 backdrop-blur-sm">
@@ -647,51 +674,62 @@ export function DashboardContent() {
 
             {activeTab === "saved" && (
               <div className="space-y-4">
-                {savedJobs.map((job, index) => (
-                  <motion.div
-                    key={job.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-xl mb-2 text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
-                              {job.jobTitle}
-                            </CardTitle>
-                            <div className="flex items-center gap-3 text-sm text-[#9ca3af] mb-3">
-                              <span>{job.company}</span>
-                              <span>•</span>
-                              <span>Saved {job.savedDate}</span>
+                {userSavedJobs.length > 0 ? (
+                  userSavedJobs.map((job, index) => (
+                    <motion.div
+                      key={job.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500">
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <CardTitle className="text-xl mb-2 text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
+                                {job.title}
+                              </CardTitle>
+                              <div className="flex items-center gap-3 text-sm text-[#9ca3af] mb-3">
+                                <span>{job.company_name || job.company}</span>
+                                <span>•</span>
+                                <span>{job.location}</span>
+                                <span>•</span>
+                                <span>Saved {new Date(job.saved_at || Date.now()).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => handleSave(job.id, job)}
+                                variant="outline"
+                                size="sm"
+                                className={`border-2 ${savedJobIds.includes(job.id)
+                                  ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
+                                  : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                                  }`}
+                              >
+                                <Bookmark className={`h-4 w-4 ${savedJobIds.includes(job.id) ? "fill-[#6366f1]" : ""}`} />
+                              </Button>
+                              <Button
+                                asChild
+                                size="sm"
+                                className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0"
+                              >
+                                <Link href={`/jobs/${job.id}`}>Apply</Link>
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleSave(job.id, job)}
-                              variant="outline"
-                              size="sm"
-                              className={`border-2 ${savedJobIds.includes(job.id)
-                                ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
-                                : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
-                                }`}
-                            >
-                              <Bookmark className={`h-4 w-4 ${savedJobIds.includes(job.id) ? "fill-[#6366f1]" : ""}`} />
-                            </Button>
-                            <Button
-                              asChild
-                              size="sm"
-                              className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0"
-                            >
-                              <Link href={`/jobs/${job.id}`}>Apply</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  </motion.div>
-                ))}
+                        </CardHeader>
+                      </Card>
+                    </motion.div>
+                  ))
+                ) : (
+                  <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm p-8 text-center">
+                    <p className="text-[#9ca3af]">You haven't saved any jobs yet.</p>
+                    <Button asChild className="mt-4 bg-[#6366f1]">
+                      <Link href="/jobs">Explore Jobs</Link>
+                    </Button>
+                  </Card>
+                )}
               </div>
             )}
 

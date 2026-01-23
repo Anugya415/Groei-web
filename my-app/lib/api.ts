@@ -383,3 +383,9 @@ export const resumeAPI = {
     return response.json();
   },
 };
+
+export const chatAPI = {
+  sendMessage: async (message: string, history: any[] = []) => {
+    return api.post<{ response: string }>('/chat', { message, history });
+  },
+};

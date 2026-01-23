@@ -494,11 +494,14 @@ export const resendVerificationEmail = async (req, res) => {
 
     // Send verification email
     try {
-      await sendVerificationEmail(user.email, user.name, verificationToken);
+      const emailResult = await sendVerificationEmail(user.email, user.name, verificationToken);
+      if (!emailResult.success) {
+        throw new Error(emailResult.error || 'Failed to send verification email');
+      }
       res.json({ message: 'Verification email sent successfully' });
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
-      res.status(500).json({ error: 'Failed to send verification email' });
+      res.status(500).json({ error: emailError.message || 'Failed to send verification email' });
     }
   } catch (err) {
     const error = err || new Error('Unknown error occurred');
@@ -540,11 +543,14 @@ export const forgotPassword = async (req, res) => {
 
       // Send password reset email
       try {
-        await sendPasswordResetEmail(user.email, user.name, resetToken);
+        const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
+        if (!emailResult.success) {
+          throw new Error(emailResult.error || 'Failed to send password reset email');
+        }
         console.log('✅ Password reset email sent to:', user.email);
       } catch (emailError) {
         console.error('Failed to send password reset email:', emailError);
-        return res.status(500).json({ error: 'Failed to send password reset email' });
+        return res.status(500).json({ error: emailError.message || 'Failed to send password reset email' });
       }
     }
 

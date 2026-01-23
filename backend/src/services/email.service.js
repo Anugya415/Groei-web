@@ -3,25 +3,43 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create reusable transporter
-const createTransporter = () => {
-  // For development, you can use Gmail with app password
-  // For production, use proper SMTP server
-  return nodemailer.createTransport({
+// Persistent transporter instance
+let transporterInstance = null;
+
+/**
+ * Get or create transporter
+ */
+const getTransporter = () => {
+  if (transporterInstance) return transporterInstance;
+
+  const config = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false, // true for 465, false for other ports
+    secure: process.env.SMTP_SECURE === 'true' || false,
     auth: {
       user: process.env.SMTP_USER || process.env.EMAIL_USER,
       pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD,
     },
-  });
+  };
+
+  // Optimization for Gmail
+  if (config.host.includes('gmail.com')) {
+    config.service = 'gmail';
+    // When using service: 'gmail', host and port are handled by nodemailer
+    delete config.host;
+    delete config.port;
+  }
+
+  transporterInstance = nodemailer.createTransport(config);
+  return transporterInstance;
 };
 
-// Verify transporter configuration
+/**
+ * Verify transporter configuration
+ */
 export const verifyEmailConfig = async () => {
   try {
-    const transporter = createTransporter();
+    const transporter = getTransporter();
     await transporter.verify();
     console.log('✅ Email server is ready to send messages');
     return true;
@@ -29,13 +47,14 @@ export const verifyEmailConfig = async () => {
     const error = err || new Error('Unknown email config error');
     console.warn('⚠️  Email configuration error:', error.message || error);
     console.warn('⚠️  Email functionality may not work. Please configure SMTP settings in .env');
+    transporterInstance = null; // Reset if failed
     return false;
   }
 };
 
 // Email templates
 const emailTemplates = {
-  verification: (name, verificationUrl) => ({
+  verification: (data) => ({
     subject: 'Verify Your Email - GROEI',
     html: `
       <!DOCTYPE html>
@@ -58,13 +77,13 @@ const emailTemplates = {
             <h1>Welcome to GROEI!</h1>
           </div>
           <div class="content">
-            <h2>Hello ${name}!</h2>
+            <h2>Hello ${data.name || 'User'}!</h2>
             <p>Thank you for signing up for GROEI. Please verify your email address to complete your registration and start exploring job opportunities.</p>
             <p style="text-align: center;">
-              <a href="${verificationUrl}" class="button">Verify Email Address</a>
+              <a href="${data.url}" class="button">Verify Email Address</a>
             </p>
             <p>Or copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; color: #6366f1;">${verificationUrl}</p>
+            <p style="word-break: break-all; color: #6366f1;">${data.url}</p>
             <p><strong>This link will expire in 24 hours.</strong></p>
             <p>If you didn't create an account with GROEI, please ignore this email.</p>
           </div>
@@ -78,11 +97,11 @@ const emailTemplates = {
     text: `
       Welcome to GROEI!
       
-      Hello ${name}!
+      Hello ${data.name || 'User'}!
       
       Thank you for signing up for GROEI. Please verify your email address to complete your registration.
       
-      Click this link to verify your email: ${verificationUrl}
+      Click this link to verify your email: ${data.url}
       
       This link will expire in 24 hours.
       
@@ -92,7 +111,7 @@ const emailTemplates = {
     `,
   }),
 
-  passwordReset: (name, resetUrl) => ({
+  passwordReset: (data) => ({
     subject: 'Reset Your Password - GROEI',
     html: `
       <!DOCTYPE html>
@@ -116,13 +135,13 @@ const emailTemplates = {
             <h1>Password Reset Request</h1>
           </div>
           <div class="content">
-            <h2>Hello ${name}!</h2>
+            <h2>Hello ${data.name || 'User'}!</h2>
             <p>We received a request to reset your password for your GROEI account.</p>
             <p style="text-align: center;">
-              <a href="${resetUrl}" class="button">Reset Password</a>
+              <a href="${data.url}" class="button">Reset Password</a>
             </p>
             <p>Or copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; color: #6366f1;">${resetUrl}</p>
+            <p style="word-break: break-all; color: #6366f1;">${data.url}</p>
             <div class="warning">
               <strong>Important:</strong> This link will expire in 1 hour. If you didn't request a password reset, please ignore this email and your password will remain unchanged.
             </div>
@@ -138,11 +157,11 @@ const emailTemplates = {
     text: `
       Password Reset Request
       
-      Hello ${name}!
+      Hello ${data.name || 'User'}!
       
       We received a request to reset your password for your GROEI account.
       
-      Click this link to reset your password: ${resetUrl}
+      Click this link to reset your password: ${data.url}
       
       This link will expire in 1 hour.
       
@@ -152,7 +171,7 @@ const emailTemplates = {
     `,
   }),
 
-  otp: (name, otp) => ({
+  otp: (data) => ({
     subject: 'Your Verification Code - GROEI',
     html: `
       <!DOCTYPE html>
@@ -175,9 +194,9 @@ const emailTemplates = {
               <h1>Verification Code</h1>
             </div>
             <div class="content">
-              <h2>Hello ${name}!</h2>
+              <h2>Hello ${data.name || 'User'}!</h2>
               <p>Use the following code to complete your registration with GROEI. This code is valid for 10 minutes.</p>
-              <div class="otp-code">${otp}</div>
+              <div class="otp-code">${data.otp}</div>
               <p>If you didn't request this code, please ignore this email.</p>
             </div>
             <div class="footer">
@@ -190,19 +209,19 @@ const emailTemplates = {
     text: `
       Your Verification Code - GROEI
       
-      Hello ${name} !
+      Hello ${data.name || 'User'}!
 
-  Use the following code to complete your registration with GROEI:
+      Use the following code to complete your registration with GROEI:
       
-      ${otp}
+      ${data.otp}
       
       This code is valid for 10 minutes.
       
-      © ${new Date().getFullYear()} GROEI.All rights reserved.
+      © ${new Date().getFullYear()} GROEI. All rights reserved.
     `,
   }),
 
-  interview: (name, data) => ({
+  interview: (data) => ({
     subject: `Interview Scheduled: ${data.jobTitle} at ${data.companyName}`,
     html: `
       <!DOCTYPE html>
@@ -227,7 +246,7 @@ const emailTemplates = {
             <h1>Interview Scheduled</h1>
           </div>
           <div class="content">
-            <h2>Hello ${name}!</h2>
+            <h2>Hello ${data.name || 'User'}!</h2>
             <p>Great news! Your application for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong> has moved forward, and an interview has been scheduled.</p>
             
             <div class="details">
@@ -252,7 +271,7 @@ const emailTemplates = {
     text: `
       Interview Scheduled
       
-      Hello ${name}!
+      Hello ${data.name || 'User'}!
       
       Your application for ${data.jobTitle} at ${data.companyName} has progressed to the interview stage.
       
@@ -269,10 +288,12 @@ const emailTemplates = {
   }),
 };
 
-// Send email
+/**
+ * Send email
+ */
 export const sendEmail = async (to, templateName, templateData) => {
   try {
-    const transporter = createTransporter();
+    const transporter = getTransporter();
 
     // Check if email is configured
     if (!process.env.SMTP_USER && !process.env.EMAIL_USER) {
@@ -285,10 +306,7 @@ export const sendEmail = async (to, templateName, templateData) => {
       throw new Error(`Email template "${templateName}" not found`);
     }
 
-    const { subject, html, text } = template(
-      templateData.name || 'User',
-      templateData.url
-    );
+    const { subject, html, text } = template(templateData);
 
     const mailOptions = {
       from: `"GROEI" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
@@ -299,16 +317,18 @@ export const sendEmail = async (to, templateName, templateData) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent:', info.messageId);
+    console.log(`✅ Email [${templateName}] sent to ${to}:`, info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (err) {
     const error = err || new Error('Unknown email error');
-    console.error('❌ Email send error:', error.message || error);
+    console.error(`❌ Email [${templateName}] send error:`, error.message || error);
     return { success: false, error: error.message || 'Failed to send email' };
   }
 };
 
-// Send verification email
+/**
+ * Send verification email
+ */
 export const sendVerificationEmail = async (email, name, token) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
@@ -319,7 +339,9 @@ export const sendVerificationEmail = async (email, name, token) => {
   });
 };
 
-// Send password reset email
+/**
+ * Send password reset email
+ */
 export const sendPasswordResetEmail = async (email, name, token) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
@@ -330,16 +352,19 @@ export const sendPasswordResetEmail = async (email, name, token) => {
   });
 };
 
-// Send OTP email
+/**
+ * Send OTP email
+ */
 export const sendOTP = async (email, name, otp) => {
   return await sendEmail(email, 'otp', {
     name,
     otp,
-    url: otp, // keep url for compatibility if needed
   });
 };
 
-// Send interview scheduling email
+/**
+ * Send interview scheduling email
+ */
 export const sendInterviewEmail = async (email, name, interviewData) => {
   return await sendEmail(email, 'interview', {
     name,

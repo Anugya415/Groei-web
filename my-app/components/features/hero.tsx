@@ -133,39 +133,85 @@ export function Hero() {
                             background: { color: "transparent" },
                             fpsLimit: 120,
                             particles: {
-                                number: { value: 80, density: { enable: true, value_area: 800 } },
-                                color: { value: ["#041f2b", "#6366f1", "#8b5cf6"] },
-                                shape: { type: "circle" },
-                                opacity: {
-                                    value: { min: 0.1, max: 0.5 },
-                                    random: true,
-                                    anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false },
+                                number: {
+                                    value: 100,
+                                    density: { enable: true, value_area: 1000 }
                                 },
-                                size: { value: { min: 1, max: 4 }, random: true },
+                                color: {
+                                    value: ["#041f2b", "#6366f1", "#a5b4fc", "#8b5cf6"]
+                                },
+                                shape: {
+                                    type: "circle"
+                                },
+                                opacity: {
+                                    value: { min: 0.2, max: 0.6 },
+                                    random: true,
+                                    anim: {
+                                        enable: true,
+                                        speed: 1,
+                                        opacity_min: 0.1,
+                                        sync: false
+                                    },
+                                },
+                                size: {
+                                    value: { min: 1, max: 3.5 },
+                                    random: true,
+                                    anim: {
+                                        enable: true,
+                                        speed: 2,
+                                        size_min: 0.1,
+                                        sync: false
+                                    }
+                                },
                                 move: {
                                     enable: true,
-                                    speed: 1.5,
+                                    speed: 1.2,
                                     direction: "none",
                                     random: true,
                                     straight: false,
-                                    outModes: { default: "bounce" },
+                                    outModes: { default: "out" },
+                                    attract: {
+                                        enable: true,
+                                        rotateX: 600,
+                                        rotateY: 1200
+                                    }
                                 },
                                 links: {
                                     enable: true,
-                                    distance: 150,
+                                    distance: 180,
                                     color: "#041f2b",
-                                    opacity: 0.15,
+                                    opacity: 0.18,
                                     width: 1,
+                                    triangles: {
+                                        enable: true,
+                                        opacity: 0.03
+                                    }
                                 },
                             },
                             interactivity: {
                                 events: {
-                                    onHover: { enable: true, mode: ["grab", "bubble"] },
-                                    onClick: { enable: true, mode: "push" },
+                                    onHover: {
+                                        enable: true,
+                                        mode: ["grab", "bubble"]
+                                    },
+                                    onClick: {
+                                        enable: true,
+                                        mode: "push"
+                                    },
+                                    resize: true
                                 },
                                 modes: {
-                                    grab: { distance: 200, links: { opacity: 0.4 } },
-                                    bubble: { distance: 200, size: 6, duration: 0.4, opacity: 0.8 },
+                                    grab: {
+                                        distance: 220,
+                                        links: { opacity: 0.5 }
+                                    },
+                                    bubble: {
+                                        distance: 250,
+                                        size: 7,
+                                        duration: 0.5,
+                                        opacity: 0.9,
+                                        color: "#6366f1"
+                                    },
                                     push: { quantity: 4 },
                                 },
                             },

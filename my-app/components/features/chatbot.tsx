@@ -13,6 +13,8 @@ interface Message {
   timestamp: Date;
 }
 
+import { chatAPI } from "@/lib/api";
+
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -58,22 +60,7 @@ export function Chatbot() {
     setIsTyping(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputValue,
-          history: messages.slice(-10), // Send last 10 messages for context
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
-      }
-
-      const data = await response.json();
+      const data = await chatAPI.sendMessage(inputValue, messages.slice(-10));
 
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
