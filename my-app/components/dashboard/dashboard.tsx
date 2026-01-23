@@ -304,9 +304,9 @@ export function DashboardContent() {
 
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
-      <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 overflow-hidden">
+        <div className="fade-grid" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
           {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
@@ -473,8 +473,8 @@ export function DashboardContent() {
                 <button
                   onClick={() => setActiveTab("applications")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "applications"
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
-                      : "text-[#9ca3af] hover:text-[#e8e8f0]"
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                    : "text-[#9ca3af] hover:text-[#e8e8f0]"
                     }`}
                 >
                   Applications
@@ -482,8 +482,8 @@ export function DashboardContent() {
                 <button
                   onClick={() => setActiveTab("saved")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "saved"
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
-                      : "text-[#9ca3af] hover:text-[#e8e8f0]"
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                    : "text-[#9ca3af] hover:text-[#e8e8f0]"
                     }`}
                 >
                   Saved Jobs
@@ -491,8 +491,8 @@ export function DashboardContent() {
                 <button
                   onClick={() => setActiveTab("recommendations")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "recommendations"
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
-                      : "text-[#9ca3af] hover:text-[#e8e8f0]"
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                    : "text-[#9ca3af] hover:text-[#e8e8f0]"
                     }`}
                 >
                   Recommendations
@@ -500,8 +500,8 @@ export function DashboardContent() {
                 <button
                   onClick={() => setActiveTab("find-jobs")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "find-jobs"
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
-                      : "text-[#9ca3af] hover:text-[#e8e8f0]"
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                    : "text-[#9ca3af] hover:text-[#e8e8f0]"
                     }`}
                 >
                   Find Jobs
@@ -673,8 +673,8 @@ export function DashboardContent() {
                               variant="outline"
                               size="sm"
                               className={`border-2 ${savedJobIds.includes(job.id)
-                                  ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
-                                  : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                                ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
+                                : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                                 }`}
                             >
                               <Bookmark className={`h-4 w-4 ${savedJobIds.includes(job.id) ? "fill-[#6366f1]" : ""}`} />
@@ -727,8 +727,8 @@ export function DashboardContent() {
                               variant="outline"
                               size="sm"
                               className={`border-2 ${savedJobIds.includes(job.id)
-                                  ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
-                                  : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                                ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
+                                : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                                 }`}
                             >
                               <Bookmark className={`h-4 w-4 ${savedJobIds.includes(job.id) ? "fill-[#6366f1]" : ""}`} />
@@ -814,8 +814,8 @@ export function DashboardContent() {
                               onClick={() => handleSave(job.id, job)}
                               variant="outline"
                               className={`border-2 ${savedJobIds.includes(job.id)
-                                  ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
-                                  : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                                ? "border-[#6366f1] bg-[#6366f1]/10 text-[#6366f1]"
+                                : "border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
                                 }`}
                             >
                               <Bookmark className={`h-4 w-4 mr-2 ${savedJobIds.includes(job.id) ? "fill-[#6366f1]" : ""}`} />

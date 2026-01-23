@@ -236,38 +236,45 @@ export function AdminApplicationsContent() {
 
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [interviewDate, setInterviewDate] = useState("");
+  const [interviewType, setInterviewType] = useState("Video");
+  const [interviewLocation, setInterviewLocation] = useState("");
+  const [interviewLink, setInterviewLink] = useState("");
+  const [interviewNotes, setInterviewNotes] = useState("");
   const [pendingStatusId, setPendingStatusId] = useState<number | null>(null);
 
   const handleStatusClick = (appId: number, status: string) => {
     if (status === "Interview Scheduled") {
       setPendingStatusId(appId);
+      setInterviewType("Video");
+      setInterviewLocation("");
+      setInterviewLink("");
+      setInterviewNotes("");
       setIsInterviewModalOpen(true);
     } else {
-      updateApplicationStatus(appId, status);
+      updateApplicationStatus(appId, { status });
     }
   };
 
   const submitInterview = () => {
     if (pendingStatusId && interviewDate) {
-      updateApplicationStatus(pendingStatusId, "Interview Scheduled", interviewDate);
+      updateApplicationStatus(pendingStatusId, {
+        status: "Interview Scheduled",
+        interview_date: interviewDate,
+        interview_type: interviewType,
+        interview_location: interviewType === "In-person" ? interviewLocation : "",
+        interview_link: interviewType === "Video" ? interviewLink : "",
+        notes: interviewNotes
+      });
       setIsInterviewModalOpen(false);
       setPendingStatusId(null);
       setInterviewDate("");
     }
   };
 
-  const updateApplicationStatus = async (appId: number, newStatus: string, date?: string) => {
+  const updateApplicationStatus = async (appId: number, data: any) => {
     try {
-      await applicationsAPI.updateStatus(appId, { status: newStatus, interview_date: date });
+      await applicationsAPI.updateStatus(appId, data);
       await loadApplications();
-      if (selectedApplication === appId) {
-        // Refresh selected application data if it's open
-        const updatedApp = applications.find(a => a.id === appId);
-        // Note: applications state might not be updated immediately after loadApplications in this closure
-        // So we might need to rely on the re-render triggers from loadApplications state update
-        // But for UX, we can just close the modal or keep it open.
-        // The loadApplications call will update the list.
-      }
     } catch (error) {
       console.error("Failed to update application status:", error);
     }
@@ -276,9 +283,9 @@ export function AdminApplicationsContent() {
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
       {/* ... existing render content ... */}
-      <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 overflow-hidden">
+        <div className="fade-grid" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
         </div>
 
         <div className="w-full px-4 sm:px-6 lg:px-8 relative z-10">
@@ -410,25 +417,51 @@ export function AdminApplicationsContent() {
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
-                        {application.status !== "Accepted" && application.status !== "Rejected" && (
-                          <div className="flex gap-2">
+                        {application.status === "Application Sent" || application.status === "Under Review" ? (
+                          <div className="flex flex-col gap-2">
                             <Button
                               size="sm"
-                              onClick={() => updateApplicationStatus(application.id, "Accepted")}
-                              className="flex-1 bg-[#10b981] text-white hover:bg-[#059669] border-0"
+                              onClick={() => {
+                                setPendingStatusId(application.id);
+                                setIsInterviewModalOpen(true);
+                              }}
+                              className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0 shadow-lg shadow-[#6366f1]/20"
                             >
-                              <CheckCircle2 className="h-4 w-4 mr-1" />
-                              Accept
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Approve & Schedule
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateApplicationStatus(application.id, "Rejected")}
-                              className="flex-1 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10"
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Reject
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => updateApplicationStatus(application.id, { status: "Accepted" })}
+                                className="flex-1 bg-[#10b981] text-white hover:bg-[#059669] border-0"
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateApplicationStatus(application.id, { status: "Rejected" })}
+                                className="flex-1 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            {application.status === "Interview Scheduled" && (
+                              <Button
+                                size="sm"
+                                onClick={() => updateApplicationStatus(application.id, { status: "Accepted" })}
+                                className="w-full bg-[#10b981] text-white hover:bg-[#059669] border-0"
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Hire Candidate
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -544,13 +577,13 @@ export function AdminApplicationsContent() {
                     <CardContent>
                       <div className="flex gap-3 mb-4">
                         <Button
-                          onClick={() => updateApplicationStatus(selectedAppData.id, "Accepted")}
+                          onClick={() => updateApplicationStatus(selectedAppData.id, { status: "Accepted" })}
                           className="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] text-white border-0"
                         >
                           Convert to Accepted
                         </Button>
                         <Button
-                          onClick={() => updateApplicationStatus(selectedAppData.id, "Rejected")}
+                          onClick={() => updateApplicationStatus(selectedAppData.id, { status: "Rejected" })}
                           variant="outline"
                           className="flex-1 border-[#ef4444] text-[#ef4444]"
                         >
@@ -611,21 +644,85 @@ export function AdminApplicationsContent() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-md bg-[#151520] border border-[#2a2a3a] rounded-xl p-6 shadow-2xl"
+              className="w-full max-w-lg bg-[#151520] border border-[#2a2a3a] rounded-xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]"
             >
-              <h3 className="text-xl font-bold text-[#e8e8f0] mb-4">Schedule Interview</h3>
-              <p className="text-[#9ca3af] mb-4">Select a date and time for the interview.</p>
-
-              <div className="mb-6">
-                <Input
-                  type="datetime-local"
-                  value={interviewDate}
-                  onChange={(e) => setInterviewDate(e.target.value)}
-                  className="bg-[#1e1e2e] border-[#2a2a3a] text-[#e8e8f0]"
-                />
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-[#e8e8f0]">Schedule Interview</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsInterviewModalOpen(false)}
+                  className="text-[#9ca3af] hover:text-[#e8e8f0]"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-[#9ca3af] mb-1.5 block">Interview Date & Time</label>
+                  <Input
+                    type="datetime-local"
+                    value={interviewDate}
+                    onChange={(e) => setInterviewDate(e.target.value)}
+                    className="bg-[#1e1e2e] border-[#2a2a3a] text-[#e8e8f0] focus:border-[#6366f1]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-[#9ca3af] mb-1.5 block">Interview Type</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["Video", "Phone", "In-person"].map((type) => (
+                      <Button
+                        key={type}
+                        variant={interviewType === type ? "default" : "outline"}
+                        onClick={() => setInterviewType(type)}
+                        size="sm"
+                        className={interviewType === type ? "bg-[#6366f1]" : "border-[#2a2a3a] text-[#9ca3af]"}
+                      >
+                        {type}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {interviewType === "Video" && (
+                  <div>
+                    <label className="text-sm font-medium text-[#9ca3af] mb-1.5 block">Meeting Link</label>
+                    <Input
+                      placeholder="Zoom, Google Meet, etc."
+                      value={interviewLink}
+                      onChange={(e) => setInterviewLink(e.target.value)}
+                      className="bg-[#1e1e2e] border-[#2a2a3a] text-[#e8e8f0] focus:border-[#6366f1]"
+                    />
+                  </div>
+                )}
+
+                {interviewType === "In-person" && (
+                  <div>
+                    <label className="text-sm font-medium text-[#9ca3af] mb-1.5 block">Office Location</label>
+                    <Input
+                      placeholder="Specify office address"
+                      value={interviewLocation}
+                      onChange={(e) => setInterviewLocation(e.target.value)}
+                      className="bg-[#1e1e2e] border-[#2a2a3a] text-[#e8e8f0] focus:border-[#6366f1]"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium text-[#9ca3af] mb-1.5 block">Notes for Candidate</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Preparation tips, what to bring, etc."
+                    value={interviewNotes}
+                    onChange={(e) => setInterviewNotes(e.target.value)}
+                    className="w-full bg-[#1e1e2e] border border-[#2a2a3a] rounded-md p-3 text-[#e8e8f0] text-sm focus:outline-none focus:border-[#6366f1] placeholder:text-[#6b7280]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-8">
                 <Button
                   variant="outline"
                   onClick={() => setIsInterviewModalOpen(false)}
@@ -636,9 +733,9 @@ export function AdminApplicationsContent() {
                 <Button
                   onClick={submitInterview}
                   disabled={!interviewDate}
-                  className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white"
+                  className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white px-8"
                 >
-                  Schedule
+                  Set Interview
                 </Button>
               </div>
             </motion.div>

@@ -124,39 +124,39 @@ const getStats = (companyStats: {
   acceptedApplications: number;
   underReviewApplications: number;
 }) => [
-  {
-    label: "Total Applications",
-    value: companyStats.activeApplications,
-    icon: Briefcase,
-    gradient: "from-[#6366f1] to-[#8b5cf6]",
-    change: companyStats.applicationsGrowth > 0 ? companyStats.applicationsGrowth : 0,
-    changeType: companyStats.applicationsGrowth > 0 ? "increase" : "decrease",
-  },
-  {
-    label: "Interviews Scheduled",
-    value: companyStats.interviewsScheduled,
-    icon: Calendar,
-    gradient: "from-[#8b5cf6] to-[#ec4899]",
-    change: companyStats.interviewsScheduled > 0 ? 12.5 : 0,
-    changeType: "increase",
-  },
-  {
-    label: "Under Review",
-    value: companyStats.underReviewApplications,
-    icon: Clock,
-    gradient: "from-[#ec4899] to-[#f59e0b]",
-    change: companyStats.underReviewApplications > 0 ? 8.3 : 0,
-    changeType: "increase",
-  },
-  {
-    label: "Accepted",
-    value: companyStats.acceptedApplications,
-    icon: CheckCircle2,
-    gradient: "from-[#10b981] to-[#6366f1]",
-    change: companyStats.acceptedApplications > 0 ? 15.8 : 0,
-    changeType: "increase",
-  },
-];
+    {
+      label: "Total Applications",
+      value: companyStats.activeApplications,
+      icon: Briefcase,
+      gradient: "from-[#6366f1] to-[#8b5cf6]",
+      change: companyStats.applicationsGrowth > 0 ? companyStats.applicationsGrowth : 0,
+      changeType: companyStats.applicationsGrowth > 0 ? "increase" : "decrease",
+    },
+    {
+      label: "Interviews Scheduled",
+      value: companyStats.interviewsScheduled,
+      icon: Calendar,
+      gradient: "from-[#8b5cf6] to-[#ec4899]",
+      change: companyStats.interviewsScheduled > 0 ? 12.5 : 0,
+      changeType: "increase",
+    },
+    {
+      label: "Under Review",
+      value: companyStats.underReviewApplications,
+      icon: Clock,
+      gradient: "from-[#ec4899] to-[#f59e0b]",
+      change: companyStats.underReviewApplications > 0 ? 8.3 : 0,
+      changeType: "increase",
+    },
+    {
+      label: "Accepted",
+      value: companyStats.acceptedApplications,
+      icon: CheckCircle2,
+      gradient: "from-[#10b981] to-[#6366f1]",
+      change: companyStats.acceptedApplications > 0 ? 15.8 : 0,
+      changeType: "increase",
+    },
+  ];
 
 export function AdminDashboardContent() {
   const [company, setCompany] = useState("TechCorp");
@@ -193,17 +193,17 @@ export function AdminDashboardContent() {
 
   const stats = dashboardData.stats || {};
   const recentApplications = dashboardData.recent_applications || [];
-  
+
   const totalApplications = stats.total_applications || 0;
   const interviewsScheduled = stats.interviews_scheduled || 0;
   const pendingApplications = stats.pending || 0;
   const rejectedApplications = stats.rejected || 0;
   const acceptedApplications = stats.accepted || 0;
   const underReviewApplications = stats.under_review || 0;
-  
+
   const previousMonthApplications = Math.max(0, totalApplications - 15);
   const applicationsGrowth = totalApplications > 0 ? ((totalApplications - previousMonthApplications) / previousMonthApplications * 100) : 0;
-  
+
   const companyStats = {
     totalUsers: 0,
     usersGrowth: 8.5,
@@ -219,9 +219,9 @@ export function AdminDashboardContent() {
 
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
-      <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 overflow-hidden">
+        <div className="fade-grid" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
           {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
@@ -285,9 +285,8 @@ export function AdminDashboardContent() {
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg shadow-[#6366f1]/30`}>
                           <Icon className="h-6 w-6 text-white" />
                         </div>
-                        <div className={`flex items-center gap-1 text-xs font-semibold ${
-                          stat.changeType === "increase" ? "text-[#10b981]" : "text-[#ef4444]"
-                        }`}>
+                        <div className={`flex items-center gap-1 text-xs font-semibold ${stat.changeType === "increase" ? "text-[#10b981]" : "text-[#ef4444]"
+                          }`}>
                           {stat.changeType === "increase" ? (
                             <ArrowUpRight className="h-3 w-3" />
                           ) : (
@@ -362,7 +361,7 @@ export function AdminDashboardContent() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentApplications.length > 0 ? recentApplications.map((app, index) => (
+                  {recentApplications.length > 0 ? recentApplications.map((app: any, index: number) => (
                     <motion.div
                       key={app.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -376,11 +375,10 @@ export function AdminDashboardContent() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-sm font-semibold text-[#e8e8f0]">{app.applicant_name || 'Applicant'}</p>
-                            <Badge className={`text-xs ${
-                              app.status === "Interview Scheduled" ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30" :
+                            <Badge className={`text-xs ${app.status === "Interview Scheduled" ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30" :
                               app.status === "Under Review" ? "bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30" :
-                              "bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30"
-                            }`}>
+                                "bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30"
+                              }`}>
                               {app.status}
                             </Badge>
                           </div>

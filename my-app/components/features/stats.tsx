@@ -83,7 +83,10 @@ export function Stats() {
 
   return (
     <section ref={ref} className="relative py-24 lg:py-40 bg-transparent overflow-hidden">
-      <div className="w-[85%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="fade-grid" />
+      </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;

@@ -2,10 +2,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Target, 
-  Users, 
-  Lightbulb, 
+import {
+  Target,
+  Users,
+  Lightbulb,
   TrendingUp,
   Sparkles,
   Globe,
@@ -78,7 +78,7 @@ export function AboutContent() {
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
       <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
+          <div className="fade-grid" />
           {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
@@ -104,7 +104,7 @@ export function AboutContent() {
           ))}
         </div>
 
-        <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -129,7 +129,7 @@ export function AboutContent() {
         </div>
       </section>
 
-      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <div className="mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -144,18 +144,18 @@ export function AboutContent() {
               </span>
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] mx-auto rounded-full"></div>
-            
+
             <div className="space-y-5 text-[#9ca3af] leading-relaxed text-center">
               <p className="text-base sm:text-lg">
-                GROEI was founded with a simple yet powerful vision: to make job searching smarter, faster, and more effective. 
+                GROEI was founded with a simple yet powerful vision: to make job searching smarter, faster, and more effective.
                 We recognized that traditional job boards were outdated and inefficient, leaving both job seekers and employers frustrated.
               </p>
               <p className="text-base sm:text-lg">
-                Using advanced AI and machine learning, we've created a platform that understands your skills, preferences, and career goals. 
+                Using advanced AI and machine learning, we've created a platform that understands your skills, preferences, and career goals.
                 Our intelligent matching system connects you with opportunities that truly align with your aspirations.
               </p>
               <p className="text-base sm:text-lg">
-                Today, GROEI serves thousands of professionals and companies worldwide, helping them find meaningful connections 
+                Today, GROEI serves thousands of professionals and companies worldwide, helping them find meaningful connections
                 that drive career growth and business success.
               </p>
             </div>
@@ -192,9 +192,8 @@ export function AboutContent() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className={`relative flex items-center gap-6 md:gap-8 ${
-                    index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                  }`}
+                  className={`relative flex items-center gap-6 md:gap-8 ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                    }`}
                 >
                   <div className="flex-1">
                     <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10">
@@ -274,7 +273,7 @@ export function AboutContent() {
         </div>
       </section>
 
-      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -305,7 +304,7 @@ export function AboutContent() {
         </motion.div>
       </section>
 
-      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -324,8 +323,8 @@ export function AboutContent() {
                 </span>
               </h2>
               <p className="text-lg sm:text-xl text-[#9ca3af] leading-relaxed mb-8">
-                Whether you're looking for your next opportunity or seeking top talent, 
-                we're here to help you succeed. Join thousands of professionals and companies 
+                Whether you're looking for your next opportunity or seeking top talent,
+                we're here to help you succeed. Join thousands of professionals and companies
                 who trust GROEI for their career and hiring needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

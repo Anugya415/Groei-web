@@ -271,8 +271,25 @@ export const applicationsAPI = {
     return api.get<{ applications: any[] }>(`/applications/company${query ? `?${query}` : ''}`);
   },
 
-  updateStatus: async (id: number, data: { status: string; notes?: string; interview_date?: string }) => {
+  updateStatus: async (id: number, data: {
+    status: string;
+    notes?: string;
+    interview_date?: string;
+    interview_type?: string;
+    interview_location?: string;
+    interview_link?: string;
+  }) => {
     return api.put<{ application: any; message: string }>(`/applications/${id}/status`, data);
+  },
+};
+
+export const interviewsAPI = {
+  getMyInterviews: async () => {
+    return api.get<{ interviews: any[] }>('/interviews/my');
+  },
+
+  getById: async (id: number) => {
+    return api.get<{ interview: any }>(`/interviews/${id}`);
   },
 };
 

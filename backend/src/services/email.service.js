@@ -201,6 +201,72 @@ const emailTemplates = {
       © ${new Date().getFullYear()} GROEI.All rights reserved.
     `,
   }),
+
+  interview: (name, data) => ({
+    subject: `Interview Scheduled: ${data.jobTitle} at ${data.companyName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header h1 { color: white; margin: 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .details { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0; }
+          .detail-row { margin-bottom: 10px; }
+          .detail-label { font-weight: bold; color: #6b7280; width: 100px; display: inline-block; }
+          .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Interview Scheduled</h1>
+          </div>
+          <div class="content">
+            <h2>Hello ${name}!</h2>
+            <p>Great news! Your application for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong> has moved forward, and an interview has been scheduled.</p>
+            
+            <div class="details">
+              <div class="detail-row"><span class="detail-label">Date:</span> ${data.date}</div>
+              <div class="detail-row"><span class="detail-label">Type:</span> ${data.type}</div>
+              <div class="detail-row"><span class="detail-label">Location:</span> ${data.location}</div>
+              ${data.notes ? `<div class="detail-row"><span class="detail-label">Notes:</span> ${data.notes}</div>` : ''}
+            </div>
+            
+            <p>You can view more details and manage your interviews in your dashboard.</p>
+            <p style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/interviews" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; text-decoration: none; border-radius: 5px;">View Interviews</a>
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} GROEI. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      Interview Scheduled
+      
+      Hello ${name}!
+      
+      Your application for ${data.jobTitle} at ${data.companyName} has progressed to the interview stage.
+      
+      Interview Details:
+      Date: ${data.date}
+      Type: ${data.type}
+      Location: ${data.location}
+      ${data.notes ? `Notes: ${data.notes}` : ''}
+      
+      View details in your dashboard: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/interviews
+      
+      © ${new Date().getFullYear()} GROEI. All rights reserved.
+    `,
+  }),
 };
 
 // Send email
@@ -270,5 +336,13 @@ export const sendOTP = async (email, name, otp) => {
     name,
     otp,
     url: otp, // keep url for compatibility if needed
+  });
+};
+
+// Send interview scheduling email
+export const sendInterviewEmail = async (email, name, interviewData) => {
+  return await sendEmail(email, 'interview', {
+    name,
+    ...interviewData,
   });
 };

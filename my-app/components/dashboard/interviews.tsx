@@ -23,7 +23,7 @@ import {
   CalendarDays
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { applicationsAPI } from "@/lib/api";
+import { applicationsAPI, interviewsAPI } from "@/lib/api";
 
 export function InterviewsContent() {
   const [filter, setFilter] = useState("All");
@@ -37,27 +37,23 @@ export function InterviewsContent() {
   const loadInterviews = async () => {
     try {
       setIsLoading(true);
-      const response = await applicationsAPI.getMyApplications();
-      if (response.applications) {
-        const interviewApplications = response.applications.filter((app: any) => 
-          app.status === "Interview Scheduled" && app.interview_date
-        );
-        const formattedInterviews = interviewApplications.map((app: any) => ({
-          id: app.id,
-          jobTitle: app.job_title || "",
-          company: app.company_name || "",
-          date: app.interview_date ? new Date(app.interview_date).toLocaleDateString() : "",
-          time: app.interview_date ? new Date(app.interview_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-          type: "Video Call",
-          status: "Scheduled",
-          interviewer: "",
-          location: "",
-          match: app.match_score || 0,
-          meetingLink: null,
-          meetingId: null,
-          meetingPassword: null,
-          interviewerEmail: "",
-          interviewerPhone: "",
+      const response = await interviewsAPI.getMyInterviews();
+      if (response && response.interviews) {
+        const formattedInterviews = response.interviews.map((interview: any) => ({
+          id: interview.id,
+          jobTitle: interview.job_title || "",
+          company: interview.company_name || "",
+          date: interview.scheduled_at ? new Date(interview.scheduled_at).toLocaleDateString() : "",
+          time: interview.scheduled_at ? new Date(interview.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+          type: interview.type || "Video Call",
+          status: interview.status === 'scheduled' ? 'Scheduled' :
+            interview.status === 'completed' ? 'Completed' :
+              interview.status === 'cancelled' ? 'Cancelled' : 'Scheduled',
+          interviewer: "", // To be added if user table supports it
+          location: interview.location || (interview.type === 'Video' ? interview.meeting_link : ""),
+          match: 0, // Should be fetched from application if needed
+          meetingLink: interview.meeting_link,
+          notes: interview.notes
         }));
         setInterviews(formattedInterviews);
       }
@@ -99,8 +95,8 @@ export function InterviewsContent() {
   };
 
   const handleCancel = (interviewId: number) => {
-    setInterviews(interviews.map(interview => 
-      interview.id === interviewId 
+    setInterviews(interviews.map(interview =>
+      interview.id === interviewId
         ? { ...interview, status: "Cancelled" as const }
         : interview
     ));
@@ -108,8 +104,8 @@ export function InterviewsContent() {
 
   const handleRescheduleSubmit = () => {
     if (selectedInterview && rescheduleDate && rescheduleTime) {
-      setInterviews(interviews.map(interview => 
-        interview.id === selectedInterview 
+      setInterviews(interviews.map(interview =>
+        interview.id === selectedInterview
           ? { ...interview, date: rescheduleDate, time: rescheduleTime }
           : interview
       ));
@@ -133,9 +129,9 @@ export function InterviewsContent() {
 
   return (
     <div className="min-h-screen pt-16 lg:pt-8">
-      <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 overflow-hidden">
+        <div className="fade-grid" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
         </div>
 
         <div className="w-full px-4 sm:px-6 lg:px-8 relative z-10">
@@ -220,8 +216,11 @@ export function InterviewsContent() {
                               </div>
                             </div>
                             <div className="p-3 rounded-lg bg-[#1e1e2e] border border-[#2a2a3a]">
-                              <p className="text-sm text-[#9ca3af] mb-1">Location/Details:</p>
-                              <p className="text-sm text-[#e8e8f0]">{interview.location}</p>
+                              <p className="text-sm text-[#9ca3af] mb-1">Details & Notes:</p>
+                              <p className="text-sm text-[#e8e8f0] mb-2">{interview.location}</p>
+                              {interview.notes && (
+                                <p className="text-xs text-[#9ca3af] italic">Note: {interview.notes}</p>
+                              )}
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-2">
@@ -445,7 +444,7 @@ export function InterviewsContent() {
                                 className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0"
                               >
                                 <Video className="h-4 w-4 mr-2" />
-                                Open Meeting
+                                Join Meeting
                               </Button>
                             </div>
                           ) : interview.type === "On-site" ? (

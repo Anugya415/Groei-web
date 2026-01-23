@@ -70,14 +70,8 @@ export function Hero() {
             className="relative min-h-screen flex items-center overflow-hidden pt-20 bg-transparent text-[#041f2b] perspective-1000"
         >
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {/* Localized Reference Grid with Radial Mask */}
-                <div
-                    className="absolute inset-0 bg-[linear-gradient(to_right,#041f2b0a_1px,transparent_1px),linear-gradient(to_bottom,#041f2b0a_1px,transparent_1px)] bg-[size:2.5rem_2.5rem] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_100%,transparent_0%)] opacity-30"
-                    style={{
-                        WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 100%)",
-                        maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 100%)"
-                    }}
-                />
+                {/* Standardized Fade Grid background */}
+                <div className="fade-grid" />
 
                 {/* Central Fog Glow matching reference */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.8)_0%,transparent_60%)] z-[1]" />
@@ -139,18 +133,18 @@ export function Hero() {
                             background: { color: "transparent" },
                             fpsLimit: 120,
                             particles: {
-                                number: { value: 60, density: { enable: true, value_area: 1000 } },
-                                color: { value: ["#041f2b", "#6366f1"] },
+                                number: { value: 80, density: { enable: true, value_area: 800 } },
+                                color: { value: ["#041f2b", "#6366f1", "#8b5cf6"] },
                                 shape: { type: "circle" },
                                 opacity: {
-                                    value: { min: 0.1, max: 0.3 },
+                                    value: { min: 0.1, max: 0.5 },
                                     random: true,
-                                    anim: { enable: true, speed: 1, opacity_min: 0.05, sync: false },
+                                    anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false },
                                 },
-                                size: { value: { min: 1, max: 3 }, random: true },
+                                size: { value: { min: 1, max: 4 }, random: true },
                                 move: {
                                     enable: true,
-                                    speed: 1,
+                                    speed: 1.5,
                                     direction: "none",
                                     random: true,
                                     straight: false,
@@ -160,18 +154,18 @@ export function Hero() {
                                     enable: true,
                                     distance: 150,
                                     color: "#041f2b",
-                                    opacity: 0.1,
+                                    opacity: 0.15,
                                     width: 1,
                                 },
                             },
                             interactivity: {
                                 events: {
-                                    onHover: { enable: true, mode: ["grab", "repulse"] },
+                                    onHover: { enable: true, mode: ["grab", "bubble"] },
                                     onClick: { enable: true, mode: "push" },
                                 },
                                 modes: {
-                                    grab: { distance: 200, links: { opacity: 0.3 } },
-                                    repulse: { distance: 200, duration: 0.4 },
+                                    grab: { distance: 200, links: { opacity: 0.4 } },
+                                    bubble: { distance: 200, size: 6, duration: 0.4, opacity: 0.8 },
                                     push: { quantity: 4 },
                                 },
                             },
@@ -181,7 +175,7 @@ export function Hero() {
                 )}
             </div>
 
-            <div className="w-[85%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-32 relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-32 relative z-10">
                 <div className="mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
                         <motion.div
@@ -203,7 +197,7 @@ export function Hero() {
                             </motion.div>
 
                             <div className="space-y-8">
-                                <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[6.25rem] font-black tracking-tight leading-[0.95] text-[#041f2b]">
+                                <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[6.25rem] font-black tracking-tight leading-[0.95] text-[#041f2b]">
                                     <div className="overflow-hidden">
                                         {headline1.split("").map((char, i) => (
                                             <HeadlineChar key={i} delay={0.4 + i * 0.03}>{char}</HeadlineChar>

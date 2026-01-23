@@ -38,7 +38,7 @@ export function Footer() {
 
   return (
     <footer className="relative bg-transparent border-t border-[#041f2b]/10 pt-24 pb-12">
-      <div className="w-[85%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-12 sm:gap-16 mb-20">
             <motion.div

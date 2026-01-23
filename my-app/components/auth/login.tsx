@@ -130,7 +130,7 @@ export function LoginContent() {
       <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
         <section className="relative pt-8 pb-12 sm:pt-10 sm:pb-16 md:pt-12 md:pb-20 bg-white overflow-hidden">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#041f2b_1px,transparent_1px),linear-gradient(to_bottom,#041f2b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
+            <div className="fade-grid" />
             {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}

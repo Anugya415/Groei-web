@@ -33,7 +33,7 @@ export function Navbar() {
         : "bg-white/80 backdrop-blur-lg"
         }`}
     >
-      <div className="w-[85%] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-24 items-center justify-between">
           <Link href="/" className="relative group flex items-center">
             <motion.div
@@ -109,7 +109,7 @@ export function Navbar() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="lg:hidden bg-white border-t border-[#041f2b]/05 overflow-hidden"
           >
-            <div className="w-[85%] mx-auto px-4 py-8 space-y-2">
+            <div className="container mx-auto px-4 py-8 space-y-2">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

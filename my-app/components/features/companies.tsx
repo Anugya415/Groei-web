@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  MapPin, 
-  Building2, 
-  Users, 
-  Briefcase, 
+import {
+  Search,
+  MapPin,
+  Building2,
+  Users,
+  Briefcase,
   Filter,
   Sparkles,
   TrendingUp,
@@ -170,18 +170,18 @@ export function CompaniesContent() {
   };
 
   const topCompanies = companies.filter(company => company.featured);
-  
+
   const filteredCompanies = topCompanies.filter((company) => {
-    const matchesSearch = 
+    const matchesSearch =
       company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       company.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
       company.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesIndustry = selectedIndustry === "All Industries" || company.industry === selectedIndustry;
     const matchesSize = selectedSize === "All Sizes" || company.size === selectedSize;
-    const matchesLocation = selectedLocation === "All Locations" || 
+    const matchesLocation = selectedLocation === "All Locations" ||
       company.location.toLowerCase().includes(selectedLocation.toLowerCase());
-    
+
     return matchesSearch && matchesIndustry && matchesSize && matchesLocation;
   });
 
@@ -190,7 +190,7 @@ export function CompaniesContent() {
       {/* Hero Section */}
       <section className="relative py-6 sm:py-8 md:py-10 bg-[#0a0a0f] overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
+          <div className="fade-grid" />
           {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
@@ -216,7 +216,7 @@ export function CompaniesContent() {
           ))}
         </div>
 
-        <div className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -369,7 +369,7 @@ export function CompaniesContent() {
       </section>
 
       {/* Company Listings */}
-      <section className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -410,7 +410,7 @@ export function CompaniesContent() {
                   className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
                   whileHover={{ scaleX: 1 }}
                 />
-                
+
                 {company.featured && (
                   <Badge className="absolute top-4 right-4 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white border-0 z-10 shadow-lg shadow-[#6366f1]/30">
                     Featured
@@ -428,10 +428,10 @@ export function CompaniesContent() {
                           {company.name}
                         </CardTitle>
                         {company.verified && (
-                          <CheckCircle2 className="h-5 w-5 text-[#6366f1] flex-shrink-0" title="Verified Company" />
+                          <CheckCircle2 className="h-5 w-5 text-[#6366f1] flex-shrink-0" />
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="secondary" className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a]">
                           {company.industry}

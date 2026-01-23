@@ -14,6 +14,7 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import resumeRoutes from './routes/resume.routes.js';
 import resumeAnalysisRoutes from './routes/resumeAnalysis.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import interviewRoutes from './routes/interview.routes.js';
 import path from 'path';
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/resume-analysis', resumeAnalysisRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/interviews', interviewRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

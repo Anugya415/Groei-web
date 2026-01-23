@@ -45,20 +45,12 @@ export function HowItWorks() {
   return (
     <section ref={ref} className="relative bg-white overflow-hidden py-24 lg:py-40">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Precision Grid Layer */}
-        <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,#041f2b08_1px,transparent_1px),linear-gradient(to_bottom,#041f2b08_1px,transparent_1px)] bg-[size:2.5rem_2.5rem]"
-          style={{
-            WebkitMaskImage: "radial-gradient(ellipse 60% 60% at 50% 50%, black 10%, transparent 100%)",
-            maskImage: "radial-gradient(ellipse 60% 60% at 50% 50%, black 10%, transparent 100%)"
-          }}
-        />
-
+        <div className="fade-grid" />
         {/* Atmospheric Fog Glow */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(4,31,43,0.02)_0%,transparent_70%)] z-[1]" />
       </div>
 
-      <div className="w-[85%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
