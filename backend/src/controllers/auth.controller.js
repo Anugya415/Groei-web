@@ -126,14 +126,22 @@ export const signup = async (req, res) => {
 export const sendOtpSignup = async (req, res) => {
   try {
     const { email, name } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
     const pool = getPool();
 
-    if (!email) return res.status(400).json({ error: 'Email is required' });
-
     // Check if user exists
-    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) {
-      return res.status(400).json({ error: 'Email already registered. Please login.' });
+    try {
+      const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+      if (existing.length > 0) {
+        return res.status(400).json({ error: 'Email already registered. Please login.' });
+      }
+    } catch (dbErr) {
+      console.error('[AUTH] Database error checking user:', dbErr);
+      throw dbErr;
     }
 
     // Generate 6 digit OTP
@@ -141,17 +149,20 @@ export const sendOtpSignup = async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Store in DB
-    await pool.query(
-      'INSERT INTO otp_verifications (email, otp, expires_at) VALUES (?, ?, ?)',
-      [email, otp, expiresAt]
-    );
+    try {
+      await pool.query(
+        'INSERT INTO otp_verifications (email, otp, expires_at) VALUES (?, ?, ?)',
+        [email, otp, expiresAt]
+      );
+    } catch (dbErr) {
+      console.error('[AUTH] Database error storing OTP:', dbErr);
+      throw dbErr;
+    }
 
     // Send Email
     try {
-      console.log(`[AUTH] Attempting to send OTP to ${email}`);
-      // Use a default name if not provided (since this is step 1)
+      console.log(`[AUTH] Attempting to send OTP email to ${email}`);
       const emailResult = await sendOTP(email, name || 'Future User', otp);
-      console.log(`[AUTH] Send OTP result for ${email}:`, emailResult.success ? 'SUCCESS' : 'FAILED');
 
       if (!emailResult.success) {
         throw new Error(emailResult.error || 'Failed to send email');
@@ -159,17 +170,32 @@ export const sendOtpSignup = async (req, res) => {
 
       res.json({ message: 'OTP sent successfully' });
     } catch (emailErr) {
-      console.error("[AUTH] Email send failed:", emailErr);
-      console.log(`[DEBUG] OTP for ${email} is: ${otp}. You can use this to register since email failed.`);
+      console.error("[AUTH] Email sending failed:", emailErr.message);
+
+      // In development, if email fails, we still allow the user to proceed by returning the OTP
+      // This prevents "Internal Server Error" blocking the flow when SMTP is not working
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DEV] SIMULATED SUCCESS: OTP for ${email} is: ${otp}`);
+
+        return res.status(200).json({
+          message: 'OTP generated (Email failed, check console)',
+          debug_otp: otp,
+          warning: 'Email delivery failed. Use debug_otp or check server logs.'
+        });
+      }
+
       res.status(500).json({
-        error: 'Failed to send OTP email. Please check your SMTP settings.',
+        error: `Email sending failed: ${emailErr.message}`,
         debug_otp: process.env.NODE_ENV === 'development' ? otp : undefined
       });
     }
 
   } catch (error) {
-    console.error('[AUTH] Send OTP error:', error);
-    res.status(500).json({ error: 'Failed to process OTP request' });
+    console.error('[AUTH] Send OTP Critical error:', error);
+    res.status(500).json({
+      error: 'An internal error occurred while processing your request.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

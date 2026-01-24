@@ -1,13 +1,13 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { readFileSync } from 'fs';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
@@ -21,12 +21,12 @@ const dbName = process.env.DB_NAME || 'hackforge_db';
 const createDatabase = async () => {
   try {
     const connection = await mysql.createConnection(dbConfig);
-    
+
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
     console.log(`Database '${dbName}' created or already exists`);
-    
+
     await connection.query(`USE \`${dbName}\``);
-    
+
     const schemaSQL = `
 CREATE TABLE IF NOT EXISTS companies (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS analytics (
 `;
 
     const statements = schemaSQL.split(';').filter(stmt => stmt.trim().length > 0);
-    
+
     for (const statement of statements) {
       if (statement.trim()) {
         try {
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS analytics (
         }
       }
     }
-    
+
     const columnsToAdd = [
       { name: 'bio', type: 'TEXT' },
       { name: 'experience', type: 'VARCHAR(255)' },
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS analytics (
       { name: 'password_reset_token', type: 'VARCHAR(255)' },
       { name: 'password_reset_expires', type: 'DATETIME' },
     ];
-    
+
     for (const column of columnsToAdd) {
       try {
         const [columns] = await connection.query(
@@ -258,7 +258,7 @@ CREATE TABLE IF NOT EXISTS analytics (
            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = ?`,
           [dbName, column.name]
         );
-        
+
         if (columns.length === 0) {
           await connection.query(
             `ALTER TABLE users ADD COLUMN ${column.name} ${column.type}`
@@ -272,9 +272,9 @@ CREATE TABLE IF NOT EXISTS analytics (
       }
     }
 
-    
+
     console.log('All tables created successfully');
-    
+
     await connection.end();
     console.log('Database initialization completed');
   } catch (error) {

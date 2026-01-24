@@ -54,7 +54,12 @@ export function SignupContent() {
     setIsLoading(true);
     setError("");
     try {
-      await authAPI.sendOtp(formData.email, formData.name); // Name is optional in step 1, but if they filled it? Actually step 1 only has email usually.
+      const response: any = await authAPI.sendOtp(formData.email, formData.name);
+      if (response.debug_otp) {
+        setFormData(prev => ({ ...prev, otp: response.debug_otp }));
+        // Show as error to catch attention, but it's a success state
+        setError(`Dev Mode: Email failed. Your OTP is ${response.debug_otp}`);
+      }
       setStep(2);
     } catch (err: any) {
       setError(err.message || "Failed to send OTP");

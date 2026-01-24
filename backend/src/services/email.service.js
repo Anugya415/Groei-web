@@ -1,7 +1,12 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Persistent transporter instance
 let transporterInstance = null;
@@ -13,22 +18,19 @@ const getTransporter = () => {
   if (transporterInstance) return transporterInstance;
 
   const config = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true' || false,
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD,
+      pass: (process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || '').replace(/\s/g, ''),
     },
+    tls: {
+      rejectUnauthorized: false
+    },
+    debug: true, // show debug output
+    logger: true  // log information in console
   };
-
-  // Optimization for Gmail
-  if (config.host.includes('gmail.com')) {
-    config.service = 'gmail';
-    // When using service: 'gmail', host and port are handled by nodemailer
-    delete config.host;
-    delete config.port;
-  }
 
   transporterInstance = nodemailer.createTransport(config);
   return transporterInstance;
@@ -309,7 +311,7 @@ export const sendEmail = async (to, templateName, templateData) => {
     const { subject, html, text } = template(templateData);
 
     const mailOptions = {
-      from: `"GROEI" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+      from: process.env.SMTP_USER || process.env.EMAIL_USER, // Simplified from address
       to,
       subject,
       html,
@@ -321,7 +323,7 @@ export const sendEmail = async (to, templateName, templateData) => {
     return { success: true, messageId: info.messageId };
   } catch (err) {
     const error = err || new Error('Unknown email error');
-    console.error(`❌ Email [${templateName}] send error:`, error.message || error);
+    console.error(`❌ Email [${templateName}] send error:`, error);
     return { success: false, error: error.message || 'Failed to send email' };
   }
 };
