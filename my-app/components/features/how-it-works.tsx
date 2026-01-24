@@ -43,7 +43,7 @@ export function HowItWorks() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative bg-white overflow-hidden py-24 lg:py-40">
+    <section ref={ref} className="relative bg-transparent overflow-hidden py-24 lg:py-40">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="fade-grid" />
         {/* Atmospheric Fog Glow */}

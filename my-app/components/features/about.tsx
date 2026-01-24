@@ -76,7 +76,7 @@ const stats = [
 export function AboutContent() {
   return (
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
-      <section className="relative py-8 sm:py-12 md:py-16 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 bg-transparent overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="fade-grid" />
           {[...Array(6)].map((_, i) => (
@@ -111,18 +111,18 @@ export function AboutContent() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12 space-y-4"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151520]/50 backdrop-blur-sm border border-[#6366f1]/20 mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#041f2b]/05 backdrop-blur-sm border border-[#041f2b]/10 mb-4">
               <Sparkles className="h-4 w-4 text-[#6366f1]" />
-              <span className="text-xs font-medium text-[#a5b4fc] uppercase tracking-wide">
+              <span className="text-xs font-medium text-[#041f2b] uppercase tracking-wide">
                 About GROEI
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
                 Who We Are
               </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-[#9ca3af] max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl text-[#041f2b]/60 max-w-2xl mx-auto">
               Building the future of work, one connection at a time
             </p>
           </motion.div>
@@ -139,13 +139,13 @@ export function AboutContent() {
             className="space-y-6 text-center"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
-              <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
                 Our Story
               </span>
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] mx-auto rounded-full"></div>
 
-            <div className="space-y-5 text-[#9ca3af] leading-relaxed text-center">
+            <div className="space-y-5 text-[#041f2b]/60 leading-relaxed text-center">
               <p className="text-base sm:text-lg">
                 GROEI was founded with a simple yet powerful vision: to make job searching smarter, faster, and more effective.
                 We recognized that traditional job boards were outdated and inefficient, leaving both job seekers and employers frustrated.
@@ -172,11 +172,11 @@ export function AboutContent() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
               Our Journey
             </span>
           </h2>
-          <p className="text-lg sm:text-xl text-[#9ca3af] max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-[#041f2b]/60 max-w-2xl mx-auto">
             Key milestones in our growth story
           </p>
         </motion.div>
@@ -196,7 +196,7 @@ export function AboutContent() {
                     }`}
                 >
                   <div className="flex-1">
-                    <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10">
+                    <Card className="border border-[#041f2b]/10 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10">
                       <CardContent className="p-6">
                         <div className="flex items-center gap-4 mb-3">
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg shadow-[#6366f1]/30">
@@ -206,12 +206,12 @@ export function AboutContent() {
                             <div className="text-2xl font-bold bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] bg-clip-text text-transparent">
                               {milestone.year}
                             </div>
-                            <div className="text-lg font-semibold text-[#e8e8f0]">
+                            <div className="text-lg font-semibold text-[#041f2b]">
                               {milestone.title}
                             </div>
                           </div>
                         </div>
-                        <p className="text-sm sm:text-base text-[#9ca3af]">
+                        <p className="text-sm sm:text-base text-[#041f2b]/60">
                           {milestone.description}
                         </p>
                       </CardContent>
@@ -234,11 +234,11 @@ export function AboutContent() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
               Our Values
             </span>
           </h2>
-          <p className="text-lg sm:text-xl text-[#9ca3af] max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-[#041f2b]/60 max-w-2xl mx-auto">
             The principles that guide everything we do
           </p>
         </motion.div>
@@ -252,7 +252,7 @@ export function AboutContent() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10 h-full text-center">
+              <Card className="group relative overflow-hidden border border-[#041f2b]/10 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-xl hover:shadow-[#6366f1]/10 h-full text-center">
                 <motion.div
                   className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${value.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
                 />
@@ -260,10 +260,10 @@ export function AboutContent() {
                   <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${value.gradient} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[#6366f1]/30`}>
                     <value.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[#e8e8f0] mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#041f2b] mb-2">
                     {value.title}
                   </h3>
-                  <p className="text-sm text-[#9ca3af] leading-relaxed">
+                  <p className="text-sm text-[#041f2b]/60 leading-relaxed">
                     {value.description}
                   </p>
                 </CardContent>
@@ -296,7 +296,7 @@ export function AboutContent() {
               <div className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
                 {stat.value}
               </div>
-              <div className="text-sm sm:text-base text-[#9ca3af]">
+              <div className="text-sm sm:text-base text-[#041f2b]/60">
                 {stat.label}
               </div>
             </motion.div>
@@ -312,17 +312,17 @@ export function AboutContent() {
           transition={{ duration: 0.6 }}
           className="mx-auto text-center"
         >
-          <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm">
+          <Card className="border border-[#041f2b]/10 bg-white/50 backdrop-blur-sm">
             <CardContent className="p-8 sm:p-12">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#6366f1]/30">
                 <Heart className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
                   Join Us on Our Journey
                 </span>
               </h2>
-              <p className="text-lg sm:text-xl text-[#9ca3af] leading-relaxed mb-8">
+              <p className="text-lg sm:text-xl text-[#041f2b]/60 leading-relaxed mb-8">
                 Whether you're looking for your next opportunity or seeking top talent,
                 we're here to help you succeed. Join thousands of professionals and companies
                 who trust GROEI for their career and hiring needs.
@@ -339,7 +339,7 @@ export function AboutContent() {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                  className="border-2 border-[#041f2b]/10 text-[#041f2b] hover:bg-[#041f2b]/05 hover:border-[#6366f1]/50"
                 >
                   <Link href="/companies">Explore Companies</Link>
                 </Button>

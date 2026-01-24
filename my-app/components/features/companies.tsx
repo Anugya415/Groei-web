@@ -188,7 +188,7 @@ export function CompaniesContent() {
   return (
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
       {/* Hero Section */}
-      <section className="relative py-6 sm:py-8 md:py-10 bg-[#0a0a0f] overflow-hidden">
+      <section className="relative py-6 sm:py-8 md:py-10 bg-transparent overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="fade-grid" />
           {[...Array(6)].map((_, i) => (
@@ -223,18 +223,18 @@ export function CompaniesContent() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 space-y-3"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151520]/50 backdrop-blur-sm border border-[#6366f1]/20 mb-3">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#041f2b]/05 backdrop-blur-sm border border-[#041f2b]/10 mb-3">
               <Sparkles className="h-4 w-4 text-[#6366f1]" />
-              <span className="text-xs font-medium text-[#a5b4fc] uppercase tracking-wide">
+              <span className="text-xs font-medium text-[#041f2b] uppercase tracking-wide">
                 Top Companies
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
                 Top Companies
               </span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-[#9ca3af] max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-[#041f2b]/60 max-w-3xl mx-auto">
               Discover leading companies actively hiring and find your perfect workplace
             </p>
           </motion.div>
@@ -246,23 +246,23 @@ export function CompaniesContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="max-w-4xl mx-auto"
           >
-            <Card className="border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-md shadow-xl shadow-[#6366f1]/10">
+            <Card className="border border-[#041f2b]/10 bg-white/50 backdrop-blur-md shadow-xl shadow-[#6366f1]/10">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9ca3af]" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#041f2b]/40" />
                     <Input
                       type="text"
                       placeholder="Search companies, industries, or locations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] placeholder:text-[#9ca3af]"
+                      className="pl-10 h-12 text-base border-2 border-[#041f2b]/10 bg-[#041f2b]/05 text-[#041f2b] focus:border-[#6366f1] placeholder:text-[#041f2b]/40"
                     />
                   </div>
                   <Button
                     onClick={() => setShowFilters(!showFilters)}
                     variant="outline"
-                    className="h-12 px-6 border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                    className="h-12 px-6 border-2 border-[#041f2b]/20 text-[#041f2b] hover:bg-[#041f2b]/05 hover:border-[#6366f1]/50"
                   >
                     <Filter className="h-4 w-4 mr-2" />
                     Filters
@@ -282,17 +282,17 @@ export function CompaniesContent() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mt-6 pt-6 border-t border-[#2a2a3a] space-y-4"
+                    className="mt-6 pt-6 border-t border-[#041f2b]/10 space-y-4"
                   >
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
+                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
                           Industry
                         </label>
                         <select
                           value={selectedIndustry}
                           onChange={(e) => setSelectedIndustry(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
+                          className="w-full h-10 px-3 rounded-lg border-2 border-[#041f2b]/10 bg-[#041f2b]/05 text-[#041f2b] focus:border-[#6366f1]"
                         >
                           {industries.map((industry) => (
                             <option key={industry} value={industry}>
@@ -302,7 +302,7 @@ export function CompaniesContent() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
+                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
                           Company Size
                         </label>
                         <select
@@ -318,7 +318,7 @@ export function CompaniesContent() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-[#9ca3af] mb-2 block">
+                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
                           Location
                         </label>
                         <select
@@ -345,23 +345,23 @@ export function CompaniesContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mt-8 text-sm sm:text-base text-[#9ca3af]"
+            className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 mt-8 text-sm sm:text-base text-[#041f2b]/60"
           >
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-[#6366f1]" />
-              <span className="font-semibold text-[#e8e8f0]">{topCompanies.length}</span>
+              <span className="font-semibold text-[#041f2b]">{topCompanies.length}</span>
               <span>Top Companies</span>
             </div>
             <div className="flex items-center gap-2">
               <Briefcase className="h-5 w-5 text-[#6366f1]" />
-              <span className="font-semibold text-[#e8e8f0]">
+              <span className="font-semibold text-[#041f2b]">
                 {topCompanies.reduce((sum, c) => sum + c.jobs, 0)}+
               </span>
               <span>Open Positions</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-[#6366f1]" />
-              <span className="font-semibold text-[#e8e8f0]">100%</span>
+              <span className="font-semibold text-[#041f2b]">100%</span>
               <span>Verified</span>
             </div>
           </motion.div>
@@ -378,16 +378,16 @@ export function CompaniesContent() {
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10"
         >
           <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#041f2b] mb-2">
               {filteredCompanies.length} Top Companies
             </h2>
-            <p className="text-sm sm:text-base text-[#9ca3af]">
+            <p className="text-sm sm:text-base text-[#041f2b]/60">
               Leading companies actively hiring on GROEI
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#9ca3af]">
+          <div className="flex items-center gap-2 text-sm text-[#041f2b]/60">
             <span>Sort by:</span>
-            <select className="px-3 py-1.5 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1] text-sm">
+            <select className="px-3 py-1.5 rounded-lg border-2 border-[#041f2b]/10 bg-[#041f2b]/05 text-[#041f2b] focus:border-[#6366f1] text-sm">
               <option>Highest Rated</option>
               <option>Most Jobs</option>
               <option>Largest</option>
@@ -405,7 +405,7 @@ export function CompaniesContent() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.05 }}
             >
-              <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-sm hover:bg-[#151520] hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#6366f1]/10 h-full flex flex-col">
+              <Card className="group relative overflow-hidden border border-[#041f2b]/10 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-[#6366f1]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#6366f1]/10 h-full flex flex-col">
                 <motion.div
                   className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
                   whileHover={{ scaleX: 1 }}
@@ -424,7 +424,7 @@ export function CompaniesContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <CardTitle className="text-xl sm:text-2xl md:text-3xl text-[#e8e8f0] group-hover:text-[#a5b4fc] transition-colors">
+                        <CardTitle className="text-xl sm:text-2xl md:text-3xl text-[#041f2b] group-hover:text-[#6366f1] transition-colors">
                           {company.name}
                         </CardTitle>
                         {company.verified && (
@@ -433,16 +433,16 @@ export function CompaniesContent() {
                       </div>
 
                       <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="secondary" className="bg-[#1e1e2e] text-[#9ca3af] border border-[#2a2a3a]">
+                        <Badge variant="secondary" className="bg-[#041f2b]/05 text-[#041f2b]/60 border border-[#041f2b]/10">
                           {company.industry}
                         </Badge>
                         <div className="flex items-center gap-1">
                           <Star className="h-4 w-4 fill-[#6366f1] text-[#6366f1]" />
-                          <span className="text-sm font-semibold text-[#e8e8f0]">{company.rating}</span>
+                          <span className="text-sm font-semibold text-[#041f2b]">{company.rating}</span>
                         </div>
                       </div>
 
-                      <div className="space-y-2 text-sm text-[#9ca3af] mb-4">
+                      <div className="space-y-2 text-sm text-[#041f2b]/60 mb-4">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 flex-shrink-0" />
                           <span>{company.location}</span>
@@ -453,7 +453,7 @@ export function CompaniesContent() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Briefcase className="h-4 w-4 flex-shrink-0" />
-                          <span className="font-semibold text-slate-900 dark:text-slate-100">{company.jobs} open positions</span>
+                          <span className="font-semibold text-slate-900">{company.jobs} open positions</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Globe className="h-4 w-4 flex-shrink-0" />
@@ -461,11 +461,11 @@ export function CompaniesContent() {
                         </div>
                       </div>
 
-                      <CardDescription className="text-sm leading-relaxed text-[#9ca3af] mb-3">
+                      <CardDescription className="text-sm leading-relaxed text-[#041f2b]/60 mb-3">
                         {company.description}
                       </CardDescription>
 
-                      <div className="flex items-center gap-2 text-xs text-[#9ca3af]">
+                      <div className="flex items-center gap-2 text-xs text-[#041f2b]/60">
                         <span>Founded {company.founded}</span>
                       </div>
                     </div>
@@ -477,7 +477,7 @@ export function CompaniesContent() {
                     <Button
                       asChild
                       variant="outline"
-                      className="flex-1 border-2 border-[#2a2a3a] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#6366f1]/50"
+                      className="flex-1 border-2 border-[#041f2b]/20 text-[#041f2b] hover:bg-[#041f2b]/05 hover:border-[#6366f1]/50"
                     >
                       <Link href={`/companies/${company.id}`}>View Jobs</Link>
                     </Button>
@@ -500,7 +500,7 @@ export function CompaniesContent() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <p className="text-xl text-[#9ca3af] mb-4">
+            <p className="text-xl text-[#041f2b]/60 mb-4">
               No companies found matching your criteria
             </p>
             <Button

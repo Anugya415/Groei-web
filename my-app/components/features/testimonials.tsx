@@ -71,7 +71,7 @@ export function Testimonials() {
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section ref={ref} className="relative bg-[#0a0a0f] overflow-hidden py-20 lg:py-32">
+    <section ref={ref} className="relative bg-transparent overflow-hidden py-20 lg:py-32">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f1_1px,transparent_1px),linear-gradient(to_bottom,#6366f1_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5" />
         {[...Array(9)].map((_, i) => (
@@ -109,18 +109,18 @@ export function Testimonials() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151520]/50 backdrop-blur-sm border border-[#6366f1]/20 mb-4">
               <Quote className="h-4 w-4 text-[#6366f1]" />
-              <span className="text-xs font-medium text-[#a5b4fc] uppercase tracking-wide">
+              <span className="text-xs font-medium text-[#6366f1] uppercase tracking-wide">
                 Testimonials
               </span>
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight px-4">
-              <span className="bg-gradient-to-r from-[#e8e8f0] to-[#a5b4fc] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#041f2b] to-[#4338ca] bg-clip-text text-transparent">
                 What Our Users
               </span>
               <br />
-              <span className="text-[#9ca3af]">Say About Us</span>
+              <span className="text-[#041f2b]/60">Say About Us</span>
             </h2>
-            <p className="text-lg md:text-xl text-[#9ca3af] max-w-3xl mx-auto px-4">
+            <p className="text-lg md:text-xl text-[#041f2b]/60 max-w-3xl mx-auto px-4">
               Join thousands of professionals who found their perfect match with GROEI
             </p>
           </motion.div>
@@ -147,7 +147,7 @@ export function Testimonials() {
                   transition={{ duration: 0.5, delay: (index % testimonials.length) * 0.1 }}
                   whileHover={{ scale: 1.02, y: -4 }}
                 >
-                  <Card className="group relative overflow-hidden border border-[#2a2a3a] bg-[#151520]/50 backdrop-blur-md hover:bg-[#151520] hover:border-[#6366f1]/30 hover:shadow-2xl hover:shadow-[#6366f1]/15 transition-all duration-700 h-full">
+                  <Card className="group relative overflow-hidden border border-[#041f2b]/05 bg-white/50 backdrop-blur-md hover:bg-white hover:border-[#6366f1]/30 hover:shadow-2xl hover:shadow-[#6366f1]/15 transition-all duration-700 h-full">
                     <motion.div
                       className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${testimonial.gradient} opacity-0 group-hover:opacity-10 rounded-full -mr-24 -mt-24 blur-3xl transition-opacity duration-700`}
                       animate={{
@@ -190,7 +190,7 @@ export function Testimonials() {
                       </motion.div>
 
                       <motion.p
-                        className="text-[#9ca3af] mb-8 leading-relaxed text-base"
+                        className="text-[#041f2b]/60 mb-8 leading-relaxed text-base"
                         initial={{ opacity: 0, y: 10 }}
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0 }}
                         transition={{ delay: (index % testimonials.length) * 0.1 + 0.5 }}
@@ -212,10 +212,10 @@ export function Testimonials() {
                           {testimonial.avatar}
                         </motion.div>
                         <div>
-                          <div className="font-semibold text-[#e8e8f0] text-base">
+                          <div className="font-semibold text-[#041f2b] text-base">
                             {testimonial.name}
                           </div>
-                          <div className="text-sm text-[#9ca3af] mt-0.5">
+                          <div className="text-sm text-[#041f2b]/60 mt-0.5">
                             {testimonial.role} at {testimonial.company}
                           </div>
                         </div>

@@ -24,7 +24,7 @@ export function CTA() {
     }, []);
 
     return (
-        <section ref={ref} className="relative bg-white overflow-hidden py-24 lg:py-40">
+        <section ref={ref} className="relative bg-transparent overflow-hidden py-24 lg:py-40">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Precision Grid Layer */}
                 <div

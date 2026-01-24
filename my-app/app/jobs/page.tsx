@@ -28,7 +28,7 @@ export default function JobsPage() {
 
   if (isLoggedIn) {
     return (
-      <div className="min-h-screen flex bg-[#0a0a0f]">
+      <div className="min-h-screen flex bg-transparent">
         <DashboardSidebar />
         <main className="flex-1 lg:ml-64">
           <div className="pt-16 lg:pt-8">
@@ -40,7 +40,7 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0f]">
+    <div className="min-h-screen flex flex-col bg-transparent">
       <Navbar />
       <main className="flex-1">
         <FindJobsContent />

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function ResumeScannerPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0f]">
+    <div className="min-h-screen flex flex-col bg-transparent">
       <Navbar />
       <main className="flex-1">
         <ResumeScannerContent />
