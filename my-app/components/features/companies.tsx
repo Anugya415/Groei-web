@@ -22,9 +22,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { companiesAPI } from "@/lib/api";
 
-const industries = ["All Industries", "Technology", "Finance", "Healthcare", "Education", "E-commerce", "Consulting"];
-const sizes = ["All Sizes", "Startup (1-50)", "Small (51-200)", "Medium (201-1000)", "Large (1000+)"];
-const locations = ["All Locations", "Remote", "New York", "San Francisco", "London", "Toronto"];
+
 
 const MOCK_COMPANIES = [
   {
@@ -126,17 +124,13 @@ const MOCK_COMPANIES = [
 ];
 
 export function CompaniesContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIndustry, setSelectedIndustry] = useState("All Industries");
-  const [selectedSize, setSelectedSize] = useState("All Sizes");
-  const [selectedLocation, setSelectedLocation] = useState("All Locations");
-  const [showFilters, setShowFilters] = useState(false);
+
   const [companies, setCompanies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadCompanies();
-  }, [selectedIndustry, selectedSize, selectedLocation]);
+  }, []);
 
   const loadCompanies = async () => {
     try {
@@ -171,19 +165,7 @@ export function CompaniesContent() {
 
   const topCompanies = companies.filter(company => company.featured);
 
-  const filteredCompanies = topCompanies.filter((company) => {
-    const matchesSearch =
-      company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      company.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      company.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesIndustry = selectedIndustry === "All Industries" || company.industry === selectedIndustry;
-    const matchesSize = selectedSize === "All Sizes" || company.size === selectedSize;
-    const matchesLocation = selectedLocation === "All Locations" ||
-      company.location.toLowerCase().includes(selectedLocation.toLowerCase());
-
-    return matchesSearch && matchesIndustry && matchesSize && matchesLocation;
-  });
 
   return (
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
@@ -239,106 +221,7 @@ export function CompaniesContent() {
             </p>
           </motion.div>
 
-          {/* Search Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-4xl mx-auto"
-          >
-            <Card className="border border-[#041f2b]/10 bg-white/50 backdrop-blur-md shadow-xl shadow-[#6366f1]/10">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#041f2b]/40" />
-                    <Input
-                      type="text"
-                      placeholder="Search companies, industries, or locations..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base border-2 border-[#041f2b]/10 bg-[#041f2b]/05 text-[#041f2b] focus:border-[#6366f1] placeholder:text-[#041f2b]/40"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => setShowFilters(!showFilters)}
-                    variant="outline"
-                    className="h-12 px-6 border-2 border-[#041f2b]/20 text-[#041f2b] hover:bg-[#041f2b]/05 hover:border-[#6366f1]/50"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filters
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="h-12 px-8 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 shadow-lg shadow-[#6366f1]/30"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
-                  </Button>
-                </div>
 
-                {/* Filters */}
-                {showFilters && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-6 pt-6 border-t border-[#041f2b]/10 space-y-4"
-                  >
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
-                          Industry
-                        </label>
-                        <select
-                          value={selectedIndustry}
-                          onChange={(e) => setSelectedIndustry(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-[#041f2b]/10 bg-[#041f2b]/05 text-[#041f2b] focus:border-[#6366f1]"
-                        >
-                          {industries.map((industry) => (
-                            <option key={industry} value={industry}>
-                              {industry}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
-                          Company Size
-                        </label>
-                        <select
-                          value={selectedSize}
-                          onChange={(e) => setSelectedSize(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
-                        >
-                          {sizes.map((size) => (
-                            <option key={size} value={size}>
-                              {size}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-[#041f2b]/60 mb-2 block">
-                          Location
-                        </label>
-                        <select
-                          value={selectedLocation}
-                          onChange={(e) => setSelectedLocation(e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border-2 border-[#2a2a3a] bg-[#1e1e2e] text-[#e8e8f0] focus:border-[#6366f1]"
-                        >
-                          {locations.map((location) => (
-                            <option key={location} value={location}>
-                              {location}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
 
           {/* Stats */}
           <motion.div
@@ -379,7 +262,7 @@ export function CompaniesContent() {
         >
           <div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#041f2b] mb-2">
-              {filteredCompanies.length} Top Companies
+              {topCompanies.length} Top Companies
             </h2>
             <p className="text-sm sm:text-base text-[#041f2b]/60">
               Leading companies actively hiring on GROEI
@@ -397,7 +280,7 @@ export function CompaniesContent() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {filteredCompanies.map((company, index) => (
+          {topCompanies.map((company, index) => (
             <motion.div
               key={company.id}
               initial={{ opacity: 0, y: 20 }}
@@ -494,26 +377,15 @@ export function CompaniesContent() {
           ))}
         </div>
 
-        {filteredCompanies.length === 0 && (
+        {topCompanies.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
             <p className="text-xl text-[#041f2b]/60 mb-4">
-              No companies found matching your criteria
+              No top companies found at the moment
             </p>
-            <Button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedIndustry("All Industries");
-                setSelectedSize("All Sizes");
-                setSelectedLocation("All Locations");
-              }}
-              variant="outline"
-            >
-              Clear Filters
-            </Button>
           </motion.div>
         )}
       </section>

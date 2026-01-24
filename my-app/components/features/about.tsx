@@ -77,32 +77,7 @@ export function AboutContent() {
   return (
     <div className="min-h-screen pt-20 sm:pt-24 lg:pt-28">
       <section className="relative py-8 sm:py-12 md:py-16 bg-transparent overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="fade-grid" />
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full blur-3xl"
-              style={{
-                width: `${250 + i * 60}px`,
-                height: `${250 + i * 60}px`,
-                background: `radial-gradient(circle, rgba(99, 102, 241, ${0.12 - i * 0.015}) 0%, transparent 70%)`,
-                left: `${10 + i * 15}%`,
-                top: `${10 + i * 12}%`,
-              }}
-              animate={{
-                scale: [1, 1.4, 1],
-                rotate: [0, 180, 360],
-              }}
-              transition={{
-                duration: 18 + i * 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.6,
-              }}
-            />
-          ))}
-        </div>
+
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div

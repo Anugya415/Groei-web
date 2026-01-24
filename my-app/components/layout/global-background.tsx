@@ -36,9 +36,9 @@ export function GlobalBackground() {
         <div className="fixed inset-0 -z-50 pointer-events-none overflow-hidden bg-white">
             {/* 1. Base Gradient Atmosphere (Fog) */}
             <div className="absolute inset-0 opacity-[0.4] blur-[160px]">
-                {/* Deep Blue Mist */}
+                {/* Indigo Mist */}
                 <motion.div
-                    className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-blue-100/40"
+                    className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-[#6366f1]/20"
                     animate={{
                         x: [0, 60, -40, 0],
                         y: [0, -50, 70, 0],
@@ -46,9 +46,9 @@ export function GlobalBackground() {
                     }}
                     transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
                 />
-                {/* Soft Pink Glow */}
+                {/* Violet Glow */}
                 <motion.div
-                    className="absolute bottom-[-15%] right-[-10%] w-[90vw] h-[90vw] rounded-full bg-pink-100/30"
+                    className="absolute bottom-[-15%] right-[-10%] w-[90vw] h-[90vw] rounded-full bg-[#8b5cf6]/15"
                     animate={{
                         x: [0, -70, 50, 0],
                         y: [0, 60, -40, 0],
@@ -56,9 +56,9 @@ export function GlobalBackground() {
                     }}
                     transition={{ duration: 45, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                 />
-                {/* Indigo Aura */}
+                {/* Deep Indigo Aura */}
                 <motion.div
-                    className="absolute top-[30%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-indigo-100/25"
+                    className="absolute top-[30%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-[#4338ca]/10"
                     animate={{
                         x: [0, 50, -60, 0],
                         y: [0, 80, -50, 0],
@@ -66,9 +66,9 @@ export function GlobalBackground() {
                     }}
                     transition={{ duration: 35, repeat: Infinity, ease: "easeInOut", delay: 5 }}
                 />
-                {/* Emerald Haze */}
+                {/* Blue/Indigo Haze */}
                 <motion.div
-                    className="absolute bottom-[20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-emerald-100/20"
+                    className="absolute bottom-[20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-[#6366f1]/10"
                     animate={{
                         opacity: [0.3, 0.6, 0.3],
                         scale: [1, 1.2, 1],
@@ -136,7 +136,7 @@ export function GlobalBackground() {
                         }
                     },
                     particles: {
-                        color: { value: ["#041f2b", "#6366f1", "#ec4899", "#10b981"] },
+                        color: { value: ["#6366f1", "#8b5cf6", "#4338ca"] },
                         links: {
                             enable: true,
                             distance: 180,
