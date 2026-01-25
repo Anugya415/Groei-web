@@ -75,6 +75,8 @@ export class ResumeAnalysisService {
         ...skillsScore.weaknesses,
       ].slice(0, 5);
 
+      analysis.scrapedData = parsedData;
+
       return analysis;
     } catch (error) {
       console.error('Resume analysis error:', error);
@@ -275,8 +277,8 @@ export class ResumeAnalysisService {
       result.suggestions.push('Add more skills to showcase your expertise');
     }
 
-    const hasTechSkills = skills.some(skill => 
-      typeof skill === 'string' && 
+    const hasTechSkills = skills.some(skill =>
+      typeof skill === 'string' &&
       /(javascript|python|java|react|node|sql|html|css|typescript|vue|angular)/i.test(skill)
     );
 

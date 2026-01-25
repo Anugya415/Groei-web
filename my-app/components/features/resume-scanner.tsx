@@ -297,6 +297,22 @@ export function ResumeScannerContent() {
                       </div>
                     </div>
 
+                    {analysisData.scrapedData?.skills && analysisData.scrapedData.skills.length > 0 && (
+                      <div className="p-4 rounded-lg bg-[#6366f1]/10 border border-[#6366f1]/30">
+                        <h4 className="font-semibold text-[#6366f1] mb-2 flex items-center gap-2">
+                          <Zap className="h-4 w-4" />
+                          Detected Skills (AI Extracted)
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisData.scrapedData.skills.map((skill: string, idx: number) => (
+                            <Badge key={idx} variant="secondary" className="bg-white/50 text-[#041f2b] border border-[#6366f1]/20">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {analysisData.strengths && analysisData.strengths.length > 0 && (
                       <div className="p-4 rounded-lg bg-[#10b981]/10 border border-[#10b981]/30">
                         <h4 className="font-semibold text-[#10b981] mb-2 flex items-center gap-2">
