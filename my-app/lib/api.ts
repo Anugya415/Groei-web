@@ -49,9 +49,15 @@ class ApiClient {
           errorData = { error: errorText || `Request failed with status ${response.status}` };
         }
 
-        const errorMessage = errorData.errors && Array.isArray(errorData.errors)
-          ? errorData.errors.map((e: any) => e.msg || e.message || e.param).join(', ')
-          : errorData.error || errorData.message || `Request failed with status ${response.status}`;
+        let errorMessage = `Request failed with status ${response.status}`;
+        
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorMessage = errorData.errors.map((e: any) => e.msg || e.message || e.param).join(', ');
+        } else if (errorData.error) {
+          errorMessage = typeof errorData.error === 'string' ? errorData.error : JSON.stringify(errorData.error);
+        } else if (errorData.message) {
+          errorMessage = typeof errorData.message === 'string' ? errorData.message : JSON.stringify(errorData.message);
+        }
 
         const error = new Error(errorMessage);
         (error as any).status = response.status;
