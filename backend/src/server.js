@@ -15,6 +15,7 @@ import resumeRoutes from './routes/resume.routes.js';
 import resumeAnalysisRoutes from './routes/resumeAnalysis.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import interviewRoutes from './routes/interview.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -53,6 +54,7 @@ app.use('/api/resumes', resumeRoutes);
 app.use('/api/resume-analysis', resumeAnalysisRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/contact', contactRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

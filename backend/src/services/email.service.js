@@ -288,6 +288,61 @@ const emailTemplates = {
       © ${new Date().getFullYear()} GROEI. All rights reserved.
     `,
   }),
+  contact: (data) => ({
+    subject: `New Contact Message: ${data.subject}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header h1 { color: white; margin: 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .field { margin-bottom: 15px; }
+          .label { font-weight: bold; color: #6b7280; display: block; margin-bottom: 5px; }
+          .message-box { background: white; padding: 15px; border: 1px solid #e5e7eb; border-radius: 5px; white-space: pre-wrap; }
+          .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>New Contact Message</h1>
+          </div>
+          <div class="content">
+            <div class="field">
+              <span class="label">From:</span>
+              ${data.name} (${data.email})
+            </div>
+            <div class="field">
+              <span class="label">Subject:</span>
+              ${data.subject}
+            </div>
+            <div class="field">
+              <span class="label">Message:</span>
+              <div class="message-box">${data.message}</div>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Received via GROEI Contact Form</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      New Contact Message via GROEI
+      
+      From: ${data.name} (${data.email})
+      Subject: ${data.subject}
+      
+      Message:
+      ${data.message}
+    `,
+  }),
 };
 
 /**
@@ -372,4 +427,18 @@ export const sendInterviewEmail = async (email, name, interviewData) => {
     name,
     ...interviewData,
   });
+};
+/**
+ * Send contact form email
+ */
+export const sendContactEmail = async (contactData) => {
+  // diverse to SUPPORT_EMAIL if set, otherwise to SMTP_USER (admin)
+  const recipient = process.env.SUPPORT_EMAIL || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+  if (!recipient) {
+    console.error('❌ No recipient configured for contact form (SUPPORT_EMAIL or SMTP_USER missing)');
+    return { success: false, error: 'Server configuration error' };
+  }
+
+  return await sendEmail(recipient, 'contact', contactData);
 };

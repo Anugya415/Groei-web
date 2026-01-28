@@ -27,10 +27,10 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  { icon: Mail, href: "mailto:contact@groei.com", label: "Email" },
+  { icon: Github, href: "https://github.com/groei", label: "GitHub" },
+  { icon: Twitter, href: "https://twitter.com/groei_app", label: "Twitter" },
+  { icon: Linkedin, href: "https://linkedin.com/company/groei", label: "LinkedIn" },
+  { icon: Mail, href: "mailto:support@groei.com", label: "Email" },
 ];
 
 export function Footer() {

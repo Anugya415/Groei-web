@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Mail, Phone, Send, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { contactAPI } from "@/lib/api";
 
 export function ContactContent() {
     const [formData, setFormData] = useState({
@@ -18,15 +19,22 @@ export function ContactContent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSent, setIsSent] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
+        setError("");
+
+        try {
+            await contactAPI.sendMessage(formData);
             setIsSent(true);
             setFormData({ name: "", email: "", subject: "", message: "" });
-        }, 1500);
+        } catch (err: any) {
+            setError(err.message || "Failed to send message. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -150,11 +158,16 @@ export function ContactContent() {
                                             <Sparkles className="h-8 w-8" />
                                         </div>
                                         <h3 className="text-2xl font-bold text-[#041f2b]">Message Sent!</h3>
-                                        <p className="text-[#041f2b]/70">Thank you for contacting us. We will get back to you shortly.</p>
+                                        <p className="text--[#041f2b]/70">Thank you for contacting us. We will get back to you shortly.</p>
                                         <Button onClick={() => setIsSent(false)} variant="outline">Send another message</Button>
                                     </div>
                                 ) : (
                                     <form onSubmit={handleSubmit} className="space-y-6">
+                                        {error && (
+                                            <div className="p-3 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444] text-sm">
+                                                {error}
+                                            </div>
+                                        )}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium text-[#041f2b]">Name</label>

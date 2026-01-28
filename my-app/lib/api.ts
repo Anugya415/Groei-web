@@ -50,7 +50,7 @@ class ApiClient {
         }
 
         let errorMessage = `Request failed with status ${response.status}`;
-        
+
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorMessage = errorData.errors.map((e: any) => e.msg || e.message || e.param).join(', ');
         } else if (errorData.error) {
@@ -393,5 +393,16 @@ export const resumeAPI = {
 export const chatAPI = {
   sendMessage: async (message: string, history: any[] = []) => {
     return api.post<{ response: string }>('/chat', { message, history });
+  },
+};
+
+export const contactAPI = {
+  sendMessage: async (data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) => {
+    return api.post<{ message: string; messageId: string }>('/contact', data);
   },
 };
