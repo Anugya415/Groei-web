@@ -167,8 +167,8 @@ export function AdminSettingsContent() {
                           key={tab.id}
                           onClick={() => setActiveTab(tab.id)}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id
-                              ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
-                              : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
+                            ? "bg-gradient-to-r from-[#6366f1]/20 to-[#8b5cf6]/20 text-[#a5b4fc] border border-[#6366f1]/30"
+                            : "text-[#9ca3af] hover:text-[#e8e8f0] hover:bg-[#1e1e2e]"
                             }`}
                         >
                           <Icon className="h-5 w-5" />
@@ -458,7 +458,7 @@ export function AdminSettingsContent() {
 
                       <div className="flex gap-3 pt-4">
                         <Button
-                          disabled={adminData.newPassword && adminData.newPassword !== adminData.confirmPassword}
+                          disabled={adminData.newPassword.length > 0 && adminData.newPassword !== adminData.confirmPassword}
                           className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#4f46e5] hover:to-[#7c3aed] border-0 disabled:opacity-50"
                         >
                           <Key className="h-4 w-4 mr-2" />
